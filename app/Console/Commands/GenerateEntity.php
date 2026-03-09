@@ -18,7 +18,7 @@ class GenerateEntity extends Command
      *
      * @var string
      */
-    protected $signature = 'make:entity {name?}';
+    protected $signature = 'make:entity {name?} {--namespace= : Custom namespace to override entity type namespace}';
 
     /**
      * The console command description.
@@ -33,9 +33,14 @@ class GenerateEntity extends Command
     protected string $entityName;
 
     /**
-     * Entity type (user, admin, etc.).
+     * Selected namespace key from config.
      */
-    protected string $entityType;
+    protected string $namespaceKey;
+
+    /**
+     * Custom namespace (optional).
+     */
+    protected ?string $customNamespace;
 
     /**
      * Execute the console command.
@@ -51,42 +56,74 @@ class GenerateEntity extends Command
         $this->entityName = Str::studly($this->entityName);
 
         $entities = config('entities', []);
-        $entityTypes = array_filter(array_keys($entities), fn($key) => $key !== 'api_version');
+        $namespaceOptions = array_filter(array_keys($entities), fn($key) => $key !== 'api_version');
 
-        if (empty($entityTypes)) {
-            $this->error('No entities configured in config/entities.php');
+        if (empty($namespaceOptions)) {
+            $this->error('No namespaces configured in config/entities.php');
             return self::FAILURE;
         }
 
-        $this->entityType = select(
-            label: 'Select entity type',
-            options: $entityTypes,
-            default: $entityTypes[0] ?? 'user'
+        $this->namespaceKey = select(
+            label: 'Select namespace',
+            options: $namespaceOptions,
+            default: $namespaceOptions[0] ?? 'user'
         );
 
-        $namespace = $entities[$this->entityType]['namespace'] ?? Str::studly($this->entityType);
+        $this->customNamespace = $this->option('namespace');
 
-        $options = [
-            'model' => 'Model',
-            'migration' => 'Migration',
-            'request' => 'Request (Store & Update)',
-            'resource' => 'Resource',
-            'seeder' => 'Seeder',
-            'service' => 'Service',
-            'filter' => 'Query Filter',
-            'repository' => 'Repository & Contract',
-            'controller' => 'Controller',
-        ];
+        if ($this->customNamespace) {
+            $namespace = Str::studly($this->customNamespace);
+            $this->info("Using custom namespace: {$namespace}");
+        } else {
+            $namespace = $entities[$this->namespaceKey]['namespace'] ?? Str::studly($this->namespaceKey);
+        }
 
-        $selected = multiselect(
-            label: 'Select files to generate',
-            options: $options,
-            default: array_keys($options)
+        $generateAll = confirm(
+            label: 'Generate all files?',
+            default: true,
+            hint: 'Choose "No" to select specific files'
         );
 
-        if (empty($selected)) {
-            $this->error('No files selected for generation.');
-            return self::FAILURE;
+        if ($generateAll) {
+            $selected = [
+                'model',
+                'migration',
+                'request',
+                'resource',
+                'seeder',
+                'service',
+                'filter',
+                'repository',
+                'controller',
+            ];
+        } else {
+            $options = [
+                'model'      => 'Model',
+                'migration'  => 'Migration',
+                'request'    => 'Request (Store & Update)',
+                'resource'   => 'Resource',
+                'seeder'     => 'Seeder',
+                'service'    => 'Service',
+                'filter'     => 'Query Filter',
+                'repository' => 'Repository & Contract',
+                'controller' => 'Controller',
+            ];
+
+            $this->newLine();
+            $this->info('Answer yes/no for each file to generate:');
+            $this->newLine();
+
+            $selected = [];
+            foreach ($options as $key => $label) {
+                if (confirm(label: "Include {$label}?", default: true)) {
+                    $selected[] = $key;
+                }
+            }
+
+            if (empty($selected)) {
+                $this->error('No files selected. Aborting.');
+                return self::FAILURE;
+            }
         }
 
         $generated = [];
@@ -109,8 +146,13 @@ class GenerateEntity extends Command
             $this->line('  1. Update the migration file with your table schema');
             $this->line('  2. Implement validation rules in Request classes');
             $this->line('  3. Customize Resource transformation');
-            $this->line('  4. Add routes to routes/' . ($entities[$this->entityType]['routes'] ?? 'api.php'));
+            $this->line('  4. Add routes to routes/' . ($entities[$this->namespaceKey]['routes'] ?? 'api.php'));
             $this->line('  5. Register repository binding in RepositoryServiceProvider');
+
+            if ($this->customNamespace) {
+                $this->newLine();
+                $this->comment("Note: Files generated with custom namespace '{$namespace}'");
+            }
         }
 
         return self::SUCCESS;
