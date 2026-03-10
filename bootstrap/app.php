@@ -23,19 +23,23 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             // User API Routes - Version 1
             Route::middleware(['api'])
-                ->prefix('api/v1/users')
-                ->name('user.v1.')
+                ->prefix('api/v1/client')
+                ->name('client.v1.')
                 ->group(base_path('routes/api.php'));
 
             // Admin API Routes - Version 1
             Route::middleware(['api'])
-                ->prefix('api/v1/admins')
+                ->prefix('api/v1/admin')
                 ->name('admin.v1.')
                 ->group(base_path('routes/admin.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 

@@ -1,12 +1,17 @@
 <?php
 
-use App\Facades\ApiResponse;
-use App\Facades\MediaUpload;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Client API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register Client API routes for your application.
+| These routes are loaded by the RouteServiceProvider with the 'api'
+| middleware group and versioned with the API prefix.
+|
+*/
 
-
-Route::post('/test', function (Request $request) {
-});
+// Example client routes
+// Route::apiResource('/', ClientController::class);
