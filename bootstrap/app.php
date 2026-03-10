@@ -106,13 +106,13 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // ── Catch-all – 500 ───────────────────────────────────────────
-            return ApiResponse::respondWithError(
-                message   : app()->hasDebugModeEnabled()
-                    ? $e->getMessage()
-                    : 'An unexpected error occurred. Please try again later.',
-                statusCode: StatusCode::SERVER_ERROR,
-                httpStatus: 500,
-            )->send();
+            // return ApiResponse::respondWithError(
+            //     message   : app()->hasDebugModeEnabled()
+            //         ? $e->getTraceAsString()
+            //         : 'An unexpected error occurred. Please try again later.',
+            //     statusCode: StatusCode::SERVER_ERROR,
+            //     httpStatus: 500,
+            // )->send();
         });
 
     })

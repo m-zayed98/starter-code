@@ -137,7 +137,7 @@ abstract class BaseApiController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data  = $this->resolveFormRequest($this->storeRequest)->validated();
-        $model = $this->service->create($this->beforeStore($data));
+        $model = $this->service->create($data);
 
         return ApiResponse::respondWithModel(
             new $this->resource($model),
@@ -149,7 +149,7 @@ abstract class BaseApiController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $data  = $this->resolveFormRequest($this->updateRequest)->validated();
-        $model = $this->service->update($id, $this->beforeUpdate($data));
+        $model = $this->service->update($id, $data);
 
         return ApiResponse::respondWithModel(
             new $this->resource($model),
@@ -184,28 +184,7 @@ abstract class BaseApiController extends Controller
             message: $this->modelName() . ' status updated successfully.',
         )->send();
     }
-
-    // ══════════════════════════════════════════════════════════════════════
-    //  Hook points for child classes
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Mutate validated data before it is passed to service->create().
-     * Override to inject auth user id, slugs, defaults, etc.
-     */
-    protected function beforeStore(array $data): array
-    {
-        return $data;
-    }
-
-    /**
-     * Mutate validated data before it is passed to service->update().
-     */
-    protected function beforeUpdate(array $data): array
-    {
-        return $data;
-    }
-
+    
     /**
      * The boolean column toggled by toggleStatus().
      * Override if your model uses a different column name.

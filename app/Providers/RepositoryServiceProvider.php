@@ -2,27 +2,17 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
+use App\Repositories\Contracts\RoleRepositoryContract;
+use App\Repositories\Contracts\UserRepositoryContract;
+use App\Repositories\RoleRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        foreach ($this->getModels() as $model) {
-            $this->app->bind(
-                "App\Repositories\Contracts\\{$model}Contract",
-                "App\Repositories\SQL\\{$model}Repository"
-            );
-        }
-    }
-
-    protected function getModels(): Collection
-    {
-        $files = Storage::disk('app')->files('Models');
-        return collect($files)->map(function ($file) {
-            return basename($file, '.php');
-        });
+        $this->app->bind(UserRepositoryContract::class, UserRepository::class);
+        $this->app->bind(RoleRepositoryContract::class, RoleRepository::class);
     }
 }

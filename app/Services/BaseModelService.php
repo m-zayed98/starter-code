@@ -44,18 +44,14 @@ abstract class BaseModelService
 
     public function create(array $data): Model
     {
-        return $this->repository->create($this->prepareDataForCreate($data));
+        return $this->repository->create($data);
     }
 
     public function update(int $id, array $data): ?Model
     {
-        $updated = $this->repository->update($id, $this->prepareDataForUpdate($data));
+        $updated = $this->repository->update($id, $data);
 
-        if ($updated) {
-            return $this->repository->show($id);
-        }
-
-        return null;
+        return $this->repository->show($id);
     }
 
     public function updateOrCreate(array $attributes, array $values = []): Model
@@ -86,15 +82,5 @@ abstract class BaseModelService
     public function exists(int $id, bool $withTrashed = false): bool
     {
         return $this->repository->exists($id, $withTrashed);
-    }
-
-    protected function prepareDataForCreate(array $data): array
-    {
-        return $data;
-    }
-
-    protected function prepareDataForUpdate(array $data): array
-    {
-        return $data;
     }
 }

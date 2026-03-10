@@ -128,18 +128,14 @@ abstract class BaseRepository implements RepositoryContract
 
     public function create(array $data): Model
     {
-        return $this->model->create($data);
+        return $this->model->create($data)->refresh();
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): Model
     {
         $record = $this->show($id);
-
-        if ($record) {
-            return $record->update($data);
-        }
-
-        return false;
+        $record->update($data);
+        return $record->refresh();
     }
 
     public function updateOrCreate(array $attributes, array $values = []): Model

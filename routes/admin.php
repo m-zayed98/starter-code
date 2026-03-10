@@ -1,17 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\PermissionController;
+use App\Http\Controllers\Api\Admin\RoleController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Admin API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register Admin API routes for your application.
-| These routes are loaded by the RouteServiceProvider with the 'api'
-| middleware group and versioned with the API prefix.
-|
-*/
+// Roles – full CRUD + toggle active status
+Route::apiResource('roles', RoleController::class);
+Route::patch('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
 
-// Example admin routes
-// Route::apiResource('/', AdminController::class);
+// Permissions – list only (used for dropdowns)
+Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
