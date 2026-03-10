@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasMedia
@@ -50,5 +52,18 @@ class User extends Authenticatable implements HasMedia
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+
+    protected function hasPermissionViaRole(Permission $permission): bool
+    {
+        if (is_a($this, Role::class)) {
+            return false;
+        }
+
+        return $this->hasRole(
+            $permission->roles->filter(fn ($role) => $role->is_active)
+        );
     }
 }
