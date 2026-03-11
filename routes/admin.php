@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Route;
 // Authentication
 Route::post('auth/login', [AuthController::class, 'login'])->name('admin.auth.login');
 Route::post('auth/forgot-password', [AuthController::class, 'forgotPassword'])->name('admin.auth.forgot-password');
-Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])->name('admin.auth.reset-password');
+Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])
+    ->middleware('auth:admin')
+    ->name('admin.auth.reset-password');
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('admin.auth.verify-otp');
 
 // Roles – full CRUD + toggle active status

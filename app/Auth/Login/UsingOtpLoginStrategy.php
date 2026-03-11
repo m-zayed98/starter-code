@@ -13,9 +13,8 @@ class UsingOtpLoginStrategy implements LoginStrategy
     public function __construct(
         private readonly string $purpose = 'login',
         private readonly int $ttlMinutes = 10,
-        private readonly int $length = 6
-    ) {
-    }
+        private readonly int $length = 4
+    ) {}
 
     public function login(string $guard, string $loginKey, string $authModel, array $credentials): array
     {
@@ -61,4 +60,3 @@ class UsingOtpLoginStrategy implements LoginStrategy
         ];
     }
 }
-
