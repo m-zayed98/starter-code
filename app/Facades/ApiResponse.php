@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \App\Services\ApiResponse\ApiResponseService respondWithCollection(\Illuminate\Http\Resources\Json\ResourceCollection $collection, string $message = 'success', string $statusCode = \App\Services\ApiResponse\StatusCode::SUCCESS, int $httpStatus = 200)
  * @method static \App\Services\ApiResponse\ApiResponseService respondWithModel(\Illuminate\Http\Resources\Json\JsonResource $resource, string $message = 'success', string $statusCode = \App\Services\ApiResponse\StatusCode::SUCCESS, int $httpStatus = 200)
  * @method static \App\Services\ApiResponse\ApiResponseService respondWithArray(array $data, string $message = 'success', string $statusCode = \App\Services\ApiResponse\StatusCode::SUCCESS, int $httpStatus = 200)
- * @method static \App\Services\ApiResponse\ApiResponseService respondWithError(string $message, string $statusCode = \App\Services\ApiResponse\StatusCode::SERVER_ERROR, int $httpStatus = 500, ?array $errors = null)
+ * @method static \App\Services\ApiResponse\ApiResponseService respondWithError(string $message, string $statusCode = \App\Services\ApiResponse\StatusCode::SERVER_ERROR, int $httpStatus = 500, ?array $errors = [])
  * @method static \App\Services\ApiResponse\ApiResponseService withPagination()
  * @method static \App\Services\ApiResponse\ApiResponseService mergeAdditional(array $additional)
  * @method static \Illuminate\Http\JsonResponse send()

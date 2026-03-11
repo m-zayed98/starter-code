@@ -141,7 +141,7 @@ abstract class BaseApiController extends Controller
 
         return ApiResponse::respondWithModel(
             new $this->resource($model),
-            message   : $this->modelName() . ' created successfully.',
+            message: $this->modelName() . ' created successfully.',
             httpStatus: 201,
         )->send();
     }
@@ -184,7 +184,7 @@ abstract class BaseApiController extends Controller
             message: $this->modelName() . ' status updated successfully.',
         )->send();
     }
-    
+
     /**
      * The boolean column toggled by toggleStatus().
      * Override if your model uses a different column name.

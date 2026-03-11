@@ -7,8 +7,9 @@ use App\Http\Requests\Admin\StoreRoleRequest;
 use App\Http\Requests\Admin\UpdateRoleRequest;
 use App\Http\Resources\Admin\RoleResource;
 use App\Services\RoleService;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
-class RoleController extends BaseApiController
+class RoleController extends BaseApiController implements HasMiddleware
 {
     protected string $modelName    = 'Role';
     protected string $serviceName  = RoleService::class;

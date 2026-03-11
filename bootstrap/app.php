@@ -11,6 +11,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -42,10 +43,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-
         // ── Only intercept JSON / API requests ────────────────────────────
         $exceptions->render(function (\Throwable $e, Request $request) {
-
             if (! $request->expectsJson()) {
                 return null; // Fall through to default HTML handler
             }
@@ -53,26 +52,26 @@ return Application::configure(basePath: dirname(__DIR__))
             // ── Validation (422) ──────────────────────────────────────────
             if ($e instanceof ValidationException) {
                 return ApiResponse::respondWithError(
-                    message   : 'The given data was invalid.',
+                    message: 'The given data was invalid.',
                     statusCode: StatusCode::VALIDATION_ERROR,
                     httpStatus: 422,
-                    errors    : $e->errors(),
+                    errors: $e->errors(),
                 )->send();
             }
 
             // ── Unauthenticated (401) ─────────────────────────────────────
             if ($e instanceof AuthenticationException) {
                 return ApiResponse::respondWithError(
-                    message   : $e->getMessage() ?: 'Unauthenticated.',
+                    message: $e->getMessage() ?: 'Unauthenticated.',
                     statusCode: StatusCode::UNAUTHORIZED,
                     httpStatus: 401,
                 )->send();
             }
 
             // ── Authorisation (403) ───────────────────────────────────────
-            if ($e instanceof AuthorizationException) {
+            if ($e instanceof UnauthorizedException || $e instanceof AuthorizationException) {
                 return ApiResponse::respondWithError(
-                    message   : $e->getMessage() ?: 'This action is unauthorized.',
+                    message: $e->getMessage() ?: 'This action is unauthorized.',
                     statusCode: StatusCode::FORBIDDEN,
                     httpStatus: 403,
                 )->send();
@@ -82,7 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e instanceof ModelNotFoundException) {
                 $model   = class_basename($e->getModel());
                 return ApiResponse::respondWithError(
-                    message   : "{$model} not found.",
+                    message: "{$model} not found.",
                     statusCode: StatusCode::NOT_FOUND,
                     httpStatus: 404,
                 )->send();
@@ -91,19 +90,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // ── Generic HTTP exceptions (404, 405 …) ──────────────────────
             if ($e instanceof NotFoundHttpException) {
                 return ApiResponse::respondWithError(
-                    message   : 'The requested resource was not found.',
+                    message: 'The requested resource was not found.',
                     statusCode: StatusCode::NOT_FOUND,
                     httpStatus: 404,
                 )->send();
             }
 
-            if ($e instanceof HttpException) {
-                return ApiResponse::respondWithError(
-                    message   : $e->getMessage() ?: 'HTTP error.',
-                    statusCode: StatusCode::SERVER_ERROR,
-                    httpStatus: $e->getStatusCode(),
-                )->send();
-            }
 
             // ── Catch-all – 500 ───────────────────────────────────────────
             // return ApiResponse::respondWithError(
@@ -114,7 +106,5 @@ return Application::configure(basePath: dirname(__DIR__))
             //     httpStatus: 500,
             // )->send();
         });
-
     })
     ->create();
-

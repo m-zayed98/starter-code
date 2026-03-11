@@ -46,7 +46,7 @@ class ApiResponseService
     private string  $message    = 'success';
     private string  $statusCode = StatusCode::SUCCESS;
     private int     $httpStatus = 200;
-    private ?array  $errors     = null;
+    private ?array  $errors     = [];
     private array   $additional = [];
     private bool    $paginate   = false;
 
@@ -121,15 +121,13 @@ class ApiResponseService
         string $message,
         string $statusCode = StatusCode::SERVER_ERROR,
         int    $httpStatus = 500,
-        ?array $errors     = null,
+        ?array $errors     = [],
     ): static {
         $this->message    = $message;
         $this->statusCode = $statusCode;
         $this->httpStatus = $httpStatus;
+        $this->errors = $errors;
 
-        if ($errors !== null && in_array($httpStatus, [400, 422], strict: true)) {
-            $this->errors = $errors;
-        }
 
         return $this;
     }
