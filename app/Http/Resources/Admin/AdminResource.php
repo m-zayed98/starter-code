@@ -16,9 +16,19 @@ class AdminResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            // Add your resource fields here
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'name' => $this->name,
+            'avatar' => $this->avatar,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'is_active' => $this->is_active,
+            'roles' => $this->roles->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name
+                ];
+            }),
+            'created_at' => $this->created_at?->format('Y-m-d H:i'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i'),
         ];
     }
 }

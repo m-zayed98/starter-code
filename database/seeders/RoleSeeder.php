@@ -2,21 +2,27 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Role::factory(10)->create();
-        
-        // Or create specific records
-        // Role::create([
-        //     // Add your data here
-        // ]);
+        // Create or retrieve the Super Admin role
+        $role = Role::query()->firstOrCreate(
+            ['name' => ['en' => 'Super Admin']],
+            ['guard_name' => 'admin']
+        );
+
+        // Attach all permissions to Super Admin
+        $permissions = Permission::query()
+            ->where('guard_name', 'admin')
+            ->pluck('id')->all();
+
+        if (! empty($permissions)) {
+            $role->permissions()->sync($permissions);
+        }
     }
 }
