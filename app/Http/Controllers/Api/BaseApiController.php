@@ -99,11 +99,10 @@ abstract class BaseApiController extends Controller
         $name = $instance->modelName();
 
         return [
-            new Middleware("permission:index-{$name}",         only: ['index']),
-            new Middleware("permission:show-{$name}",          only: ['show']),
-            new Middleware("permission:create-{$name}",        only: ['store']),
-            new Middleware("permission:update-{$name}",        only: ['update', 'toggleStatus']),
-            new Middleware("permission:destroy-{$name}",       only: ['destroy']),
+            new Middleware("permission:{$name}:read",         only: ['index', 'show']),
+            new Middleware("permission:{$name}:create",        only: ['store']),
+            new Middleware("permission:{$name}:update",        only: ['update', 'toggleStatus']),
+            new Middleware("permission:{$name}:delete",       only: ['destroy']),
         ];
     }
 
@@ -173,9 +172,7 @@ abstract class BaseApiController extends Controller
     {
         $column = $this->statusColumn();
         $model  = $this->service->showOrFail($id);
-
         $this->service->update($id, [$column => ! $model->{$column}]);
-
         $updated = $this->service->showOrFail($id, $this->resolveQueryOptions('show'));
 
         return ApiResponse::respondWithModel(

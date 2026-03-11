@@ -2,6 +2,12 @@
 
 return [
 
+    /*
+     * Separator used between the entity and the action when
+     * generating permission names, e.g. "user.view".
+     */
+    'separator' => ':',
+
     'models' => [
 
         /*

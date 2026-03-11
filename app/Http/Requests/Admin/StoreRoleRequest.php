@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\UniqueTranslation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRoleRequest extends FormRequest
@@ -22,10 +23,31 @@ class StoreRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['array', 'required'],
-            'name.en'     => ['required', 'string', 'max:20'],
-            'name.ar'     => ['required', 'string', 'max:20'],
-            'permissions' => ['sometimes', 'array'],
+            'name'        => [
+                'array',
+                'required',
+            ],
+            'name.en'     => [
+                'required',
+                'string',
+                'max:20',
+                new UniqueTranslation(
+                    table: 'roles',
+                    column: 'name',
+                    locale: 'en'
+                ),
+            ],
+            'name.ar'     => [
+                'required',
+                'string',
+                'max:20',
+                new UniqueTranslation(
+                    table: 'roles',
+                    column: 'name',
+                    locale: 'ar'
+                )
+            ],
+            'permissions' => ['required', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ];
     }

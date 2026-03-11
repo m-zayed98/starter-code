@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // Roles – full CRUD + toggle active status
 Route::apiResource('roles', RoleController::class);
-Route::patch('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
+Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
 
 // Permissions – list only (used for dropdowns)
 Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
