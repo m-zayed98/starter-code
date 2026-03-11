@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRoleRequest extends FormRequest
+class UpdateAdminRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,7 @@ class StoreRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['array', 'required'],
-            'name.en'     => ['required', 'string', 'max:20'],
-            'name.ar'     => ['required', 'string', 'max:20'],
-            'permissions' => ['sometimes', 'array'],
-            'permissions.*' => ['integer', 'exists:permissions,id'],
+            // Add your validation rules here
         ];
     }
 

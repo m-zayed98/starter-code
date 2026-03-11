@@ -102,9 +102,8 @@ abstract class BaseApiController extends Controller
             new Middleware("permission:index-{$name}",         only: ['index']),
             new Middleware("permission:show-{$name}",          only: ['show']),
             new Middleware("permission:create-{$name}",        only: ['store']),
-            new Middleware("permission:update-{$name}",        only: ['update']),
+            new Middleware("permission:update-{$name}",        only: ['update', 'toggleStatus']),
             new Middleware("permission:destroy-{$name}",       only: ['destroy']),
-            new Middleware("permission:toggle-status-{$name}", only: ['toggleStatus']),
         ];
     }
 

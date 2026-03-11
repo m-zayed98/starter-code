@@ -9,11 +9,12 @@ class PermissionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        [$resource, $action] = explode(config('permission.separator'), $this->name);
         return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'guard_name' => $this->guard_name,
-            'created_at' => $this->created_at?->toISOString(),
+            'id'            => $this->id,
+            'resource'      => $resource,
+            'action'        => $action,
+            'created_at'    => $this->created_at?->format('Y-m-d H:i'),
         ];
     }
 }

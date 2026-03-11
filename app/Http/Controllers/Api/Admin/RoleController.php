@@ -9,7 +9,7 @@ use App\Http\Resources\Admin\RoleResource;
 use App\Services\RoleService;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
-class RoleController extends BaseApiController implements HasMiddleware
+class RoleController extends BaseApiController
 {
     protected string $modelName    = 'Role';
     protected string $serviceName  = RoleService::class;

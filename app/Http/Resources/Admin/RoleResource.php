@@ -17,11 +17,12 @@ class RoleResource extends JsonResource
         return [
             'id'          => $this->id,
             'name'        => $this->name,
-            'guard_name'  => $this->guard_name,
+            'name_ar'     => $this->getTranslation('name', 'ar'),
+            'name_en'     => $this->getTranslation('name', 'en'),
             'is_active'   => $this->is_active,
-            'permissions' => $this->whenLoaded('permissions', fn () => $this->permissions->pluck('name')),
-            'created_at'  => $this->created_at?->toISOString(),
-            'updated_at'  => $this->updated_at?->toISOString(),
+            'created_at'  => $this->created_at->format('Y-m-d H:i'),
+            'updated_at'  => $this->updated_at->format('Y-m-d H:i'),
+            'permissions' => PermissionResource::collection($this->permissions),
         ];
     }
 }
