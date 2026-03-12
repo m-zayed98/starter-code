@@ -133,7 +133,7 @@ abstract class BaseRepository implements RepositoryContract
 
     public function update(int $id, array $data): Model
     {
-        $record = $this->show($id);
+        $record = $this->showOrFail($id);
         $record->update($data);
         return $record->refresh();
     }

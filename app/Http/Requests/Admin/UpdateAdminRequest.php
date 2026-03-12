@@ -35,7 +35,7 @@ class UpdateAdminRequest extends FormRequest
             ],
             'phone' => ['sometimes', 'nullable', 'string', 'max:50'],
             'avatar' => ['sometimes', 'nullable', 'image', 'max:2048'],
-            'password' => ['sometimes', 'nullable', 'confirmed', Password::defaults()],
+            'password' => ['sometimes', 'nullable', Password::defaults()],
             'is_active' => ['sometimes', 'boolean'],
             'role_id' => ['sometimes', 'integer', 'exists:roles,id'],
         ];

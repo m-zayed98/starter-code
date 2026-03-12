@@ -27,7 +27,7 @@ class StoreAdminRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:admins,email'],
             'phone' => ['nullable', 'string', 'max:50'],
             'avatar' => ['nullable', 'image', 'max:2048'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', Password::defaults()],
             'is_active' => ['sometimes', 'boolean'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],
         ];

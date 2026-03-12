@@ -33,6 +33,7 @@ class RoleService extends BaseModelService
         DB::transaction(function () use ($data, $id) {
             $permissions = Arr::pull($data, 'permissions');
             $data['guard_name'] = 'admin';
+            $this->repository->showOrFail($id);
             $updated = $this->repository->update($id, $data);
             if ($permissions) {
                 $permissions = Permission::query()->whereIn('id', $permissions)->get();

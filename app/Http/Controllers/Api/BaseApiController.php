@@ -159,8 +159,7 @@ abstract class BaseApiController extends Controller
     {
         $this->service->delete($id);
 
-        return ApiResponse::respondWithArray(
-            [],
+        return ApiResponse::respondWithSuccess(
             message: $this->modelName() . ' deleted successfully.',
         )->send();
     }

@@ -14,7 +14,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Admin extends Authenticatable implements HasMedia
 {
-    use HasFactory;
     use SoftDeletes;
     use Notifiable;
     use HasRoles;

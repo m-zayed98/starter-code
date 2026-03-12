@@ -14,13 +14,17 @@ Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])
     ->name('admin.auth.reset-password');
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('admin.auth.verify-otp');
 
-// Admins – full CRUD + toggle active status
-Route::apiResource('admins', AdminController::class);
-Route::put('admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
 
-// Roles – full CRUD + toggle active status
-Route::apiResource('roles', RoleController::class);
-Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
 
-// Permissions – list only (used for dropdowns)
-Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+Route::middleware('auth:admin')->group(function () {
+    Route::post('auth/logout', [AuthController::class, 'logout'])->name('admin.auth.logout');
+
+    Route::apiResource('admins', AdminController::class);
+    Route::put('admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
+
+    Route::apiResource('roles', RoleController::class);
+    Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
+
+    Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+});
+

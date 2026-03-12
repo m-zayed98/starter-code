@@ -114,8 +114,6 @@ abstract class BaseAuthController extends Controller
         $user->password = $data['password'];
         $user->save();
 
-        return ApiResponse::respondWithArray([
-            'message' => 'Password reset successfully.',
-        ])->send();
+        return ApiResponse::respondWithSuccess(message:__('Updated Successfully'))->send();
     }
 }

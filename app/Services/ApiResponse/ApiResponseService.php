@@ -43,16 +43,16 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
  */
 class ApiResponseService
 {
-    private string  $message    = 'success';
-    private string  $statusCode = StatusCode::SUCCESS;
-    private int     $httpStatus = 200;
-    private ?array  $errors     = [];
-    private array   $additional = [];
-    private bool    $paginate   = false;
+    private string $message = 'success';
+    private string $statusCode = StatusCode::SUCCESS;
+    private int $httpStatus = 200;
+    private ?array $errors = [];
+    private array $additional = [];
+    private bool $paginate = false;
 
     private ?ResourceCollection $collection = null;
-    private ?JsonResource       $resource   = null;
-    private ?array              $rawData    = null;
+    private ?JsonResource $resource = null;
+    private ?array $rawData = null;
 
     // ══════════════════════════════════════════════════════════════════════
     //  Entry points
@@ -64,11 +64,11 @@ class ApiResponseService
      */
     public function respondWithCollection(
         ResourceCollection $collection,
-        string $message    = 'success',
+        string $message = 'success',
         string $statusCode = StatusCode::SUCCESS,
-        int    $httpStatus = 200,
+        int $httpStatus = 200,
     ): static {
-        $this->message    = $message;
+        $this->message = $message;
         $this->statusCode = $statusCode;
         $this->httpStatus = $httpStatus;
         $this->collection = $collection;
@@ -81,14 +81,14 @@ class ApiResponseService
      */
     public function respondWithModel(
         JsonResource $resource,
-        string $message    = 'success',
+        string $message = 'success',
         string $statusCode = StatusCode::SUCCESS,
-        int    $httpStatus = 200,
+        int $httpStatus = 200,
     ): static {
-        $this->message    = $message;
+        $this->message = $message;
         $this->statusCode = $statusCode;
         $this->httpStatus = $httpStatus;
-        $this->resource   = $resource;
+        $this->resource = $resource;
 
         return $this;
     }
@@ -96,34 +96,55 @@ class ApiResponseService
     /**
      * For custom responses (e.g. tokens, counts). Array used as-is for data.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function respondWithArray(
-        array  $data,
-        string $message    = 'success',
+        array $data = [],
+        string $message = 'success',
         string $statusCode = StatusCode::SUCCESS,
-        int    $httpStatus = 200,
+        int $httpStatus = 200,
     ): static {
-        $this->message    = $message;
+        $this->message = $message;
         $this->statusCode = $statusCode;
         $this->httpStatus = $httpStatus;
-        $this->rawData    = $data;
+        $this->rawData = $data;
 
         return $this;
     }
 
+
+    /**
+     * For custom responses (e.g. tokens, counts). Array used as-is for data.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function respondWithSuccess(
+        string $message,
+        string $statusCode = StatusCode::SUCCESS,
+        int $httpStatus = 200,
+        array $data = [],
+    ): static {
+        $this->message = $message;
+        $this->statusCode = $statusCode;
+        $this->httpStatus = $httpStatus;
+        $this->rawData = $data;
+
+        return $this;
+    }
+
+
     /**
      * For error responses. Pass structured $errors for 400/422 responses.
      *
-     * @param  array<string, string[]>|null  $errors
+     * @param array<string, string[]>|null $errors
      */
     public function respondWithError(
         string $message,
         string $statusCode = StatusCode::SERVER_ERROR,
-        int    $httpStatus = 500,
-        ?array $errors     = [],
+        int $httpStatus = 500,
+        ?array $errors = [],
     ): static {
-        $this->message    = $message;
+        $this->message = $message;
         $this->statusCode = $statusCode;
         $this->httpStatus = $httpStatus;
         $this->errors = $errors;
@@ -153,7 +174,7 @@ class ApiResponseService
     /**
      * Merge extra keys into the data payload.
      *
-     * @param  array<string, mixed>  $additional
+     * @param array<string, mixed> $additional
      */
     public function mergeAdditional(array $additional): static
     {
@@ -169,10 +190,10 @@ class ApiResponseService
     public function send(): JsonResponse
     {
         return response()->json([
-            'message'     => $this->message,
+            'message' => $this->message,
             'status_code' => $this->statusCode,
-            'data'        => $this->buildData(),
-            'errors'      => $this->errors,
+            'data' => $this->buildData(),
+            'errors' => $this->errors,
         ], $this->httpStatus);
     }
 
@@ -190,7 +211,7 @@ class ApiResponseService
 
             return empty($this->additional)
                 ? $resolved
-                : array_merge((array) $resolved, $this->additional);
+                : array_merge((array)$resolved, $this->additional);
         }
 
         // ── Single JsonResource ───────────────────────────────────────────
