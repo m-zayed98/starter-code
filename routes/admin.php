@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\PermissionController;
+use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,8 @@ Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('admi
 
 Route::middleware('auth:admin')->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('admin.auth.logout');
+    Route::get('auth/profile', [ProfileController::class, 'show'])->name('admin.auth.profile.show');
+    Route::put('auth/profile', [ProfileController::class, 'update'])->name('admin.auth.profile.update');
 
     Route::apiResource('admins', AdminController::class);
     Route::put('admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
@@ -27,4 +30,3 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
 });
-

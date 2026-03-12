@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use App\Facades\MediaUpload;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class AdminService extends BaseModelService
 {
@@ -24,7 +25,7 @@ class AdminService extends BaseModelService
 
     public function create(array $data): Model
     {
-        $admin = \DB::transaction(function () use ($data) {
+        $admin = DB::transaction(function () use ($data) {
             $roleId = Arr::pull($data, 'role_id');
             $avatarFile = Arr::pull($data, 'avatar');;
 
@@ -48,7 +49,7 @@ class AdminService extends BaseModelService
 
     public function update(int $id, array $data): ?Model
     {
-        $admin = \DB::transaction(function () use ($data, $id) {
+        $admin = DB::transaction(function () use ($data, $id) {
             $roleId = Arr::pull($data, 'role_id');
             $avatarFile = Arr::pull($data, 'avatar');;
 
@@ -67,5 +68,29 @@ class AdminService extends BaseModelService
         });
 
         return $admin;
+    }
+
+    /**
+     * Update the authenticated admin's profile.
+     *
+     * @param int $id
+     * @param array $data
+     * @return Model|null
+     */
+    public function updateProfile(int $id, array $data): ?Model
+    {
+        return DB::transaction(function () use ($data, $id) {
+            $avatarFile = Arr::pull($data, 'avatar');
+
+            $admin = $this->repository->updateProfile($id, $data);
+
+            if ($avatarFile instanceof UploadedFile) {
+                MediaUpload::file($avatarFile)
+                    ->collection('avatar')
+                    ->uploadTo($admin);
+            }
+
+            return $admin;
+        });
     }
 }

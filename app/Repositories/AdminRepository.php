@@ -28,4 +28,16 @@ class AdminRepository extends BaseRepository implements AdminRepositoryContract
     {
         return new AdminFilter(request());
     }
+
+    /**
+     * Update the authenticated admin's profile.
+     *
+     * @param int $id
+     * @param array $data
+     * @return Model|null
+     */
+    public function updateProfile(int $id, array $data): ?Model
+    {
+        return $this->update($id, $data);
+    }
 }

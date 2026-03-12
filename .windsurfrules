@@ -1,0 +1,53 @@
+Project Architecture & Coding Rules
+
+You MUST strictly follow these rules when generating or modifying code in this project.
+
+1. Architecture
+- The project follows the Repository-Service Pattern.
+- Business logic MUST reside in the Service layer.
+- Controllers must remain thin and should only handle request/response.
+
+2. Controllers
+- Controllers MUST NOT contain any business logic.
+- Controllers should only:
+  - Validate request data
+  - Call the appropriate Service method
+  - Return the response
+
+3. Repository Usage
+- Direct interaction with Models is strictly forbidden outside repositories.
+- ALL database queries must be implemented inside Repository classes.
+- Services must interact only with Repository Interfaces.
+- If a needed query does not exist:
+  - Add a new method to the Repository Interface
+  - Implement it in the Concrete Repository.
+
+4. Model Restrictions
+- Models must NOT contain query logic.
+- Models should only define:
+  - Relationships
+  - Attributes
+  - Scopes (if already used in project conventions)
+
+5. Clean Architecture Principles
+All code must follow:
+- SOLID principles
+- Clean Code practices
+- Low coupling and high cohesion
+- Dependency injection via interfaces
+
+6. Media Uploads
+- All media uploads MUST use the MediaUpload facade.
+- Do NOT implement custom upload logic.
+
+7. Consistency
+Before implementing any feature:
+- Review existing code to understand how similar features are implemented.
+- Follow the existing conventions used in the project.
+
+8. When Uncertain
+If you are unsure how something should be implemented:
+- Inspect the existing codebase for similar implementations.
+- Follow the established project patterns.
+
+Violation of these rules is not allowed.
