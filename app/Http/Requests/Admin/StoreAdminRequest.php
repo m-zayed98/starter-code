@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class StoreAdminRequest extends FormRequest
 {
@@ -22,7 +23,13 @@ class StoreAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Add your validation rules here
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:admins,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'avatar' => ['nullable', 'image', 'max:2048'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'is_active' => ['sometimes', 'boolean'],
+            'role_id' => ['required', 'integer', 'exists:roles,id'],
         ];
     }
 

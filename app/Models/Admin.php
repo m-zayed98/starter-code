@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasOtps;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements HasMedia
 {
     use HasFactory;
     use SoftDeletes;
@@ -18,6 +20,7 @@ class Admin extends Authenticatable
     use HasRoles;
     use HasOtps;
     use HasApiTokens;
+    use InteractsWithMedia;
 
     /**
      * The table associated with the model.
@@ -44,4 +47,11 @@ class Admin extends Authenticatable
         'is_active' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function getAvatarAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('avatar');
+
+        return $media?->getFullUrl();
+    }
 }

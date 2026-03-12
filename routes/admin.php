@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -12,6 +13,10 @@ Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('auth:admin')
     ->name('admin.auth.reset-password');
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('admin.auth.verify-otp');
+
+// Admins – full CRUD + toggle active status
+Route::apiResource('admins', AdminController::class);
+Route::put('admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
 
 // Roles – full CRUD + toggle active status
 Route::apiResource('roles', RoleController::class);

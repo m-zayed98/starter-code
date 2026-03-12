@@ -34,11 +34,11 @@ class AuthController extends BaseAuthController
         );
 
         $user = $result['user'];
-        $permissions = $user->getAllPermissions();
+        $permissions = $user->getAllPermissions()->pluck('name');
         return ApiResponse::respondWithArray([
             'user' => AdminResource::make($user),
             'token' => $result['token'] ?? null,
-            'permissions' => PermissionResource::collection($permissions)
+            'permissions' => $permissions
         ])->send();
     }
 }

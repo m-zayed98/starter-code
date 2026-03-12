@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\AdminRepositoryContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
+use App\Facades\MediaUpload;
 
 class AdminService extends BaseModelService
 {
@@ -16,33 +19,57 @@ class AdminService extends BaseModelService
         parent::__construct($repository);
     }
 
-    /**
-     * Prepare data for create operation.
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function prepareDataForCreate(array $data): array
+    public function create(array $data): Model
     {
-        // Handle file uploads using UploadService facade
-        // Example: $data['image'] = UploadService::upload($data['image'], 'entity-folder');
-        
-        return $data;
+        $roleId = $data['role_id'] ?? null;
+        $avatarFile = $data['avatar'] ?? null;
+        unset($data['role_id'], $data['avatar']);
+
+        /** @var \App\Models\Admin&Model $admin */
+        $admin = $this->repository->create($data);
+
+        if ($avatarFile instanceof UploadedFile) {
+            MediaUpload::file($avatarFile)
+                ->collection('avatar')
+                ->uploadTo($admin);
+        }
+
+        if ($roleId !== null) {
+            $admin->syncRoles([$roleId]);
+        }
+
+        return $admin->refresh();
     }
 
-    /**
-     * Prepare data for update operation.
-     *
-     * @param array $data
-     * @return array
-     */
-    protected function prepareDataForUpdate(array $data): array
+    public function update(int $id, array $data): ?Model
     {
-        // Handle file uploads using UploadService facade
-        // Example: if (isset($data['image'])) {
-        //     $data['image'] = UploadService::upload($data['image'], 'entity-folder');
-        // }
-        
-        return $data;
+        $roleId = $data['role_id'] ?? null;
+        $avatarFile = $data['avatar'] ?? null;
+        unset($data['role_id'], $data['avatar']);
+
+        $updated = $this->repository->update($id, $data);
+
+        if (! $updated) {
+            return null;
+        }
+
+        /** @var \App\Models\Admin&Model|null $admin */
+        $admin = $this->repository->show($id);
+
+        if ($admin) {
+            if ($avatarFile instanceof UploadedFile) {
+                $admin->clearMediaCollection('avatar');
+
+                MediaUpload::file($avatarFile)
+                    ->collection('avatar')
+                    ->uploadTo($admin);
+            }
+
+            if ($roleId !== null) {
+                $admin->syncRoles([$roleId]);
+            }
+        }
+
+        return $admin;
     }
 }
