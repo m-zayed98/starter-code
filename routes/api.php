@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Client\ContactController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Example client routes
-// Route::apiResource('/', ClientController::class);
+// Contact Details
+Route::get('contact', [ContactController::class, 'index'])->name('contact.index');

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\ContactSettingController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -29,4 +30,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
 
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
+    // Contact Settings
+    Route::get('contact-settings', [ContactSettingController::class, 'show'])->name('contact-settings.show');
+    Route::put('contact-settings', [ContactSettingController::class, 'update'])->name('contact-settings.update');
 });
