@@ -47,4 +47,16 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
             ->where('status', 'active')
             ->get();
     }
+
+    /**
+     * Update the authenticated user's profile.
+     *
+     * @param int $id
+     * @param array $data
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function updateProfile(int $id, array $data): ?Model
+    {
+        return $this->update($id, $data);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories\Contracts;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 interface UserRepositoryContract extends RepositoryContract
 {
@@ -20,4 +21,13 @@ interface UserRepositoryContract extends RepositoryContract
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getActiveUsers();
+
+    /**
+     * Update the authenticated user's profile.
+     *
+     * @param int $id
+     * @param array $data
+     * @return Model|null
+     */
+    public function updateProfile(int $id, array $data): ?Model;
 }
