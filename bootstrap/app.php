@@ -52,10 +52,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // ── Validation (422) ──────────────────────────────────────────
             if ($e instanceof ValidationException) {
                 return ApiResponse::respondWithError(
-                    message: 'The given data was invalid.',
+                    message: $e->validator->errors()->first(),
                     statusCode: StatusCode::VALIDATION_ERROR,
                     httpStatus: 422,
-                    errors: $e->errors(),
+                    errors: $e->validator->errors()->toArray(),
                 )->send();
             }
 

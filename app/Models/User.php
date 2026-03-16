@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Traits\HasOtps;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Models\Permission;
@@ -17,6 +18,7 @@ class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+    use HasApiTokens;
     use Notifiable;
     use InteractsWithMedia;
     use HasRoles;
@@ -30,7 +32,10 @@ class User extends Authenticatable implements HasMedia
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'birth_date',
+        'identity_number',
     ];
 
     /**
@@ -52,11 +57,17 @@ class User extends Authenticatable implements HasMedia
     {
         return [
             'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
         ];
     }
 
+    public function getAvatarAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('avatar');
 
+        return $media?->getFullUrl();
+    }
 
     protected function hasPermissionViaRole(Permission $permission): bool
     {
