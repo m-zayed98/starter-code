@@ -2,42 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\LoginStrategyType;
+use App\Auth\Login\UsingOtpLoginStrategy;
 use App\Enums\OtpPurpose;
 use App\Facades\ApiResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password as PasswordRule;
-use Illuminate\Support\Facades\Auth;
 
 abstract class BaseAuthController extends Controller
 {
-
-    protected const LOGIN_STRATEGY = LoginStrategyType::PASSWORD;
     protected string $guard = 'api';
     protected string $authModel;
     protected string $loginKey = 'email';
-    public function login(Request $request)
+    protected $loginFormRequest = null;
+    protected $authService = null;
+
+    public function login(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            $this->loginKey => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        $loginFormRequest = app($this->loginFormRequest);
+        $data = $loginFormRequest->validated();
+        $authKey = $loginFormRequest->getAuthKey();
+        $service = is_string($this->authService) ? app($this->authService) : $this->authService;
+        $data = $service->login($data, $authKey);
 
-        $strategy = static::LOGIN_STRATEGY->make();
-
-        $result = $strategy->login(
-            $this->guard,
-            $this->loginKey,
-            $this->authModel,
-            $data
-        );
-
-        return ApiResponse::respondWithArray([
-            'user' => $result['user'],
-            'token' => $result['token'] ?? null,
-        ])->send();
+        return ApiResponse::respondWithArray($data)->send();
     }
     public function forgotPassword(Request $request): JsonResponse
     {
@@ -45,7 +34,7 @@ abstract class BaseAuthController extends Controller
             $this->loginKey => ['required', 'string'],
         ]);
 
-        $strategy = LoginStrategyType::OTP->make([
+        $strategy = app()->makeWith(UsingOtpLoginStrategy::class, [
             'purpose' => OtpPurpose::FORGOT_PASSWORD->value,
         ]);
 
@@ -114,6 +103,6 @@ abstract class BaseAuthController extends Controller
         $user->password = $data['password'];
         $user->save();
 
-        return ApiResponse::respondWithSuccess(message:__('Updated Successfully'))->send();
+        return ApiResponse::respondWithSuccess(message: __('Updated Successfully'))->send();
     }
 }

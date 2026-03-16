@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Facades\ApiResponse;
 use App\Http\Controllers\Api\BaseAuthController;
-use App\Http\Resources\Admin\AdminResource;
-use App\Http\Resources\Admin\PermissionResource;
+use App\Http\Requests\Admin\AdminLoginRequest;
 use App\Models\Admin;
-use Illuminate\Http\Request;
+use App\Services\Auth\AuthAdminService;
 
 class AuthController extends BaseAuthController
 {
@@ -17,28 +15,7 @@ class AuthController extends BaseAuthController
 
     protected string $loginKey = 'email';
 
-    public function login(Request $request)
-    {
-        $data = $request->validate([
-            $this->loginKey => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+    protected $loginFormRequest = AdminLoginRequest::class;
 
-        $strategy = static::LOGIN_STRATEGY->make();
-
-        $result = $strategy->login(
-            $this->guard,
-            $this->loginKey,
-            $this->authModel,
-            $data
-        );
-
-        $user = $result['user'];
-        $permissions = $user->getAllPermissions()->pluck('name');
-        return ApiResponse::respondWithArray([
-            'user' => AdminResource::make($user),
-            'token' => $result['token'] ?? null,
-            'permissions' => $permissions
-        ])->send();
-    }
+    protected $authService = AuthAdminService::class;
 }
