@@ -15,7 +15,7 @@ class TermsAndCondiotionsController extends Controller
     public function index()
     {
         return ApiResponse::respondWithArray(
-            $this->termsSettingService->getSettings()
+            $this->termsSettingService->getLocalizedSettings()
         )->send();
     }
 }

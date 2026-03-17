@@ -15,7 +15,7 @@ class PrivacyController extends Controller
     public function index()
     {
         return ApiResponse::respondWithArray(
-            $this->privacySettingService->getSettings()
+            $this->privacySettingService->getLocalizedSettings()
         )->send();
     }
 }

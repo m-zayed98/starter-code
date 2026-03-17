@@ -15,7 +15,7 @@ class AboutUsController extends Controller
     public function index()
     {
         return ApiResponse::respondWithArray(
-            $this->aboutUsSettingService->getSettings()
+            $this->aboutUsSettingService->getLocalizedSettings()
         )->send();
     }
 }

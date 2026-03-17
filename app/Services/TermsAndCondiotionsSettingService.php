@@ -19,6 +19,23 @@ class TermsAndCondiotionsSettingService
         ];
     }
 
+    public function getLocalizedSettings(): array
+    {
+        $locale = app()->getLocale();
+
+        $primary = $locale === 'ar'
+            ? $this->termsSetting->value_ar
+            : $this->termsSetting->value_en;
+
+        $fallback = $locale === 'ar'
+            ? $this->termsSetting->value_en
+            : $this->termsSetting->value_ar;
+
+        return [
+            'value' => $primary ?? $fallback,
+        ];
+    }
+
     public function updateSettings(UpdateTermsAndCondiotionsSettingRequest $request): void
     {
         $this->termsSetting->value_ar = $request->input('value_ar');

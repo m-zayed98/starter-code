@@ -19,6 +19,23 @@ class AboutUsSettingService
         ];
     }
 
+    public function getLocalizedSettings(): array
+    {
+        $locale = app()->getLocale();
+
+        $primary = $locale === 'ar'
+            ? $this->aboutUsSetting->value_ar
+            : $this->aboutUsSetting->value_en;
+
+        $fallback = $locale === 'ar'
+            ? $this->aboutUsSetting->value_en
+            : $this->aboutUsSetting->value_ar;
+
+        return [
+            'value' => $primary ?? $fallback,
+        ];
+    }
+
     public function updateSettings(UpdateAboutUsSettingRequest $request): void
     {
         $this->aboutUsSetting->value_ar = $request->input('value_ar');
