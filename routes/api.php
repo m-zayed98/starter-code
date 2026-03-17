@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\Client\AboutUsController;
 use App\Http\Controllers\Api\Client\ContactController;
+use App\Http\Controllers\Api\Client\PrivacyController;
+use App\Http\Controllers\Api\Client\TermsAndCondiotionsController;
 use App\Http\Controllers\Api\User\AuthController as UserAuthController;
 use App\Http\Controllers\Api\User\ProfileController as UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +21,9 @@ use Illuminate\Support\Facades\Route;
 
 // Contact Details
 Route::get('contact', [ContactController::class, 'index'])->name('contact.index');
+Route::get('about-us', [AboutUsController::class, 'index'])->name('about-us.index');
+Route::get('terms', [TermsAndCondiotionsController::class, 'index'])->name('terms-and-conditions.index');
+Route::get('privacy', [PrivacyController::class, 'index'])->name('privacy.index');
 
 // User Authentication (OTP-based)
 Route::prefix('auth')->name('auth.')->group(function () {

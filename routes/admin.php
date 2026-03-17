@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\AboutUsSettingController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\ContactSettingController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ProfileController;
+use App\Http\Controllers\Api\Admin\PrivacySettingController;
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\TermsAndCondiotionsSettingController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication
@@ -34,4 +37,16 @@ Route::middleware('auth:admin')->group(function () {
     // Contact Settings
     Route::get('contact-settings', [ContactSettingController::class, 'show'])->name('contact-settings.show');
     Route::put('contact-settings', [ContactSettingController::class, 'update'])->name('contact-settings.update');
+
+    // About Us Settings
+    Route::get('aboutus-settings', [AboutUsSettingController::class, 'show'])->name('about-us-settings.show');
+    Route::put('aboutus-settings', [AboutUsSettingController::class, 'update'])->name('about-us-settings.update');
+
+    // Terms And Conditions Settings
+    Route::put('terms-settings', [TermsAndCondiotionsSettingController::class, 'update'])->name('terms-and-conditions-settings.update');
+    Route::get('terms-settings', [TermsAndCondiotionsSettingController::class, 'show'])->name('terms-and-conditions-settings.show');
+
+    // Privacy Settings
+    Route::get('privacy-settings', [PrivacySettingController::class, 'show'])->name('privacy-settings.show');
+    Route::put('privacy-settings', [PrivacySettingController::class, 'update'])->name('privacy-settings.update');
 });
