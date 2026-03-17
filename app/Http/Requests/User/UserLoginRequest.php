@@ -3,7 +3,10 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\Contracts\AuthLoginRequestContract;
+use App\Rules\ValidDialCode;
+use App\Rules\ValidMobilePhone;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserLoginRequest extends FormRequest implements AuthLoginRequestContract
 {
@@ -24,8 +27,21 @@ class UserLoginRequest extends FormRequest implements AuthLoginRequestContract
     {
         return [
             'email' => ['required_without:phone', 'nullable', 'string', 'email'],
-            'phone' => ['required_without:email', 'nullable', 'string'],
+            'country_code' => ['required_with:phone', 'nullable', new ValidDialCode(), 'bail'],
+            'phone' => [
+                'required_without:email',
+                'nullable',
+                'string',
+                Rule::when($this->filled('phone'), [new ValidMobilePhone($this->country_code)], []),
+            ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'phone' => ltrim($this->input('phone', ''), '0'),
+        ]);
     }
 
     /**

@@ -40,7 +40,7 @@ class AuthController extends BaseAuthController
     {
         $formRequest = app(UserVerifyOtpRequest::class);
         $data = $formRequest->validated();
-        [$loginKey, $loginValue] = $formRequest->getLoginKeyAndValue();
+        [$loginKey, $loginValue, $countryCode] = $formRequest->getLoginKeyAndValue();
 
         try {
             $purpose = OtpPurpose::from($data['purpose']);
@@ -48,7 +48,12 @@ class AuthController extends BaseAuthController
             return ApiResponse::respondWithError('Invalid OTP purpose.', httpStatus: 422)->send();
         }
 
-        $user = User::query()->where($loginKey, $loginValue)->first();
+        $query = User::query()->where($loginKey, $loginValue);
+        if ($loginKey === 'phone' && is_string($countryCode) && $countryCode !== '') {
+            $query->where('country_code', $countryCode);
+        }
+
+        $user = $query->first();
 
         if (! $user || ! method_exists($user, 'consumeOtp')) {
             return ApiResponse::respondWithError('Invalid user.', httpStatus: 404)->send();
@@ -76,9 +81,9 @@ class AuthController extends BaseAuthController
     public function resendOtp(UserResendOtpRequest $request): JsonResponse
     {
         $data = $request->validated();
-        [$loginKey, $loginValue] = $request->getLoginKeyAndValue();
+        [$loginKey, $loginValue, $countryCode] = $request->getLoginKeyAndValue();
         $service = app(AuthUserService::class);
-        $result = $service->resendOtp($data, $loginKey, $loginValue);
+        $result = $service->resendOtp($data, $loginKey, $loginValue, $countryCode);
 
         return ApiResponse::respondWithArray($result)->send();
     }

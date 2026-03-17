@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\User;
 
+use App\Rules\ValidDialCode;
+use App\Rules\ValidMobilePhone;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserVerifyOtpRequest extends FormRequest
 {
@@ -23,7 +26,13 @@ class UserVerifyOtpRequest extends FormRequest
     {
         return [
             'email' => ['required_without:phone', 'nullable', 'string', 'email'],
-            'phone' => ['required_without:email', 'nullable', 'string'],
+            'country_code' => ['required_with:phone', 'nullable', new ValidDialCode(), 'bail'],
+            'phone' => [
+                'required_without:email',
+                'nullable',
+                'string',
+                Rule::when($this->filled('phone'), [new ValidMobilePhone($this->country_code)], []),
+            ],
             'code' => ['required', 'string', 'size:6'],
             'purpose' => ['required', 'string'],
         ];
@@ -37,11 +46,20 @@ class UserVerifyOtpRequest extends FormRequest
             'phone.required_without' => 'The phone field is required.',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'phone' => ltrim($this->input('phone', ''), '0'),
+        ]);
+    }
+
     public function getLoginKeyAndValue(): array
     {
         $key = $this->filled('email') ? 'email' : 'phone';
         $value = $this->input($key);
+        $countryCode = $key === 'phone' ? $this->input('country_code') : null;
 
-        return [$key, $value];
+        return [$key, $value, $countryCode];
     }
 }

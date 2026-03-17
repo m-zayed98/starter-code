@@ -27,7 +27,15 @@ class UsingOtpLoginStrategy implements LoginStrategy
         }
 
         /** @var \Illuminate\Database\Eloquent\Model&Authenticatable|null $user */
-        $user = $authModel::query()->where($loginKey, $loginValue)->first();
+        $query = $authModel::query()->where($loginKey, $loginValue);
+        if ($loginKey === 'phone') {
+            $countryCode = $credentials['country_code'] ?? null;
+            if (is_string($countryCode) && $countryCode !== '') {
+                $query->where('country_code', $countryCode);
+            }
+        }
+
+        $user = $query->first();
 
         if (!$user) {
             throw ValidationException::withMessages([

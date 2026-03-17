@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Traits\HasOtps;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -38,6 +39,7 @@ class User extends Authenticatable implements HasMedia
         'identity_number',
         'status',
         'disabled_reason',
+        'country_code',
         'disabled_at',
     ];
 
@@ -80,7 +82,32 @@ class User extends Authenticatable implements HasMedia
         }
 
         return $this->hasRole(
-            $permission->roles->filter(fn ($role) => $role->is_active)
+            $permission->roles->filter(fn($role) => $role->is_active)
+        );
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /******************************* Attributes **************/
+    public function fullPhone(): Attribute
+    {
+        return Attribute::get(
+            fn() => $this->country_code . $this->phone,
         );
     }
 }

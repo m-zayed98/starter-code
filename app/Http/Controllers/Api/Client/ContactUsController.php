@@ -17,8 +17,12 @@ class ContactUsController extends Controller
 
     public function store(StoreContactUsRequest $request)
     {
+        $data = $request->validated();
+        $data['phone'] = $data['country_code'] . $data['phone'];
+        unset($data['country_code']);
+
         $contactMessage = $this->contactMessageService->create([
-            ...$request->validated(),
+            ...$data,
             'status' => ContactMessageStatus::NOT_REPLITED,
         ]);
 
@@ -29,4 +33,3 @@ class ContactUsController extends Controller
         )->send();
     }
 }
-

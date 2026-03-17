@@ -90,11 +90,16 @@ class AuthUserService implements AuthLoginServiceContract
      * @param array<string, mixed> $data Must contain purpose and either email or phone (from getLoginKeyAndValue)
      * @return array<string, mixed>
      */
-    public function resendOtp(array $data, string $loginKey, string $loginValue): array
+    public function resendOtp(array $data, string $loginKey, string $loginValue, ?string $countryCode = null): array
     {
         $purpose = $data['purpose'];
 
-        $user = User::query()->where($loginKey, $loginValue)->first();
+        $query = User::query()->where($loginKey, $loginValue);
+        if ($loginKey === 'phone' && is_string($countryCode) && $countryCode !== '') {
+            $query->where('country_code', $countryCode);
+        }
+
+        $user = $query->first();
 
         if (! $user || ! method_exists($user, 'otps')) {
             throw \Illuminate\Validation\ValidationException::withMessages([

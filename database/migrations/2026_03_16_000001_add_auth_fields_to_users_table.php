@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone')->nullable()->unique()->after('email');
-            $table->date('birth_date')->nullable()->after('phone');
+            $table->string('country_code')->nullable()->after('phone');
+            $table->date('birth_date')->nullable()->after('country_code');
             $table->string('identity_number')->nullable()->after('birth_date');
         });
 
@@ -26,15 +27,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['phone', 'birth_date', 'identity_number']);
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('email')->nullable(false)->change();
-            $table->string('password')->nullable(false)->change();
-        });
-    }
+    public function down(): void {}
 };
