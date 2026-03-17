@@ -36,6 +36,9 @@ class User extends Authenticatable implements HasMedia
         'password',
         'birth_date',
         'identity_number',
+        'status',
+        'disabled_reason',
+        'disabled_at',
     ];
 
     /**
@@ -59,6 +62,7 @@ class User extends Authenticatable implements HasMedia
             'email_verified_at' => 'datetime',
             'birth_date' => 'date',
             'password' => 'hashed',
+            'disabled_at' => 'datetime',
         ];
     }
 

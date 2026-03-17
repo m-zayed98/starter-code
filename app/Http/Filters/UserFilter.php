@@ -8,6 +8,8 @@ class UserFilter extends BaseFilters
         'search',
         'status',
         'email',
+        'phone',
+        'identity_number',
         'role',
     ];
 
@@ -15,7 +17,9 @@ class UserFilter extends BaseFilters
     {
         $this->builder->where(function ($query) use ($value) {
             $query->where('name', 'like', "%{$value}%")
-                  ->orWhere('email', 'like', "%{$value}%");
+                ->orWhere('email', 'like', "%{$value}%")
+                ->orWhere('phone', 'like', "%{$value}%")
+                ->orWhere('identity_number', 'like', "%{$value}%");
         });
     }
 
@@ -27,6 +31,16 @@ class UserFilter extends BaseFilters
     protected function email($value)
     {
         $this->builder->where('email', 'like', "%{$value}%");
+    }
+
+    protected function phone($value)
+    {
+        $this->builder->where('phone', 'like', "%{$value}%");
+    }
+
+    protected function identity_number($value)
+    {
+        $this->builder->where('identity_number', 'like', "%{$value}%");
     }
 
     protected function role($value)

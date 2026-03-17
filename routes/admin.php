@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\PrivacySettingController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\TermsAndCondiotionsSettingController;
+use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication
@@ -29,6 +30,12 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::apiResource('admins', AdminController::class);
     Route::put('admins/{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('admins.toggle-status');
+
+    // Users
+    Route::apiResource('users', UserController::class)->only(['index', 'show']);
+    Route::put('users/{user}/toggle-status', [UserController::class, 'toggleUserStatus'])->name('users.toggle-status');
+    Route::get('users/export/excel', [UserController::class, 'exportExcel'])->name('users.export.excel');
+    Route::get('users/export/pdf', [UserController::class, 'exportPdf'])->name('users.export.pdf');
 
     Route::apiResource('roles', RoleController::class);
     Route::put('roles/{role}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');

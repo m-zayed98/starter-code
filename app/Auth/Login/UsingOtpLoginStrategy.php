@@ -35,6 +35,12 @@ class UsingOtpLoginStrategy implements LoginStrategy
             ]);
         }
 
+        if (property_exists($user, 'status') && ($user->status ?? null) === 'inactive') {
+            throw ValidationException::withMessages([
+                $loginKey => ['لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة'],
+            ]);
+        }
+
         $expiresAt = now()->addMinutes($this->ttlMinutes);
 
         if (in_array(HasOtps::class, class_uses_recursive($user), true) && method_exists($user, 'createOtp')) {

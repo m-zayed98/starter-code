@@ -54,6 +54,10 @@ class AuthController extends BaseAuthController
             return ApiResponse::respondWithError('Invalid user.', httpStatus: 404)->send();
         }
 
+        if (($user->status ?? null) === 'inactive') {
+            return ApiResponse::respondWithError('لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة', httpStatus: 403)->send();
+        }
+
         $valid = $user->consumeOtp($purpose->value, $data['code']);
 
         if (! $valid) {
@@ -89,6 +93,7 @@ class AuthController extends BaseAuthController
         $data = $request->validated();
 
         $token = $user->currentAccessToken();
+        /** @var \Laravel\Sanctum\PersonalAccessToken|null $token */
         $token?->delete();
 
         if (! empty($data['device_token'])) {

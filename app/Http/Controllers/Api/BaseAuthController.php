@@ -74,6 +74,10 @@ abstract class BaseAuthController extends Controller
             return ApiResponse::respondWithError('Invalid user.', httpStatus: 404)->send();
         }
 
+        if (property_exists($user, 'status') && ($user->status ?? null) === 'inactive') {
+            return ApiResponse::respondWithError('لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة', httpStatus: 403)->send();
+        }
+
         $valid = $user->consumeOtp($purpose->value, $data['code']);
 
         if (! $valid) {
