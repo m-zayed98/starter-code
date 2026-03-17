@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AboutUsSettingController;
 use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\ContactMessageController;
 use App\Http\Controllers\Api\Admin\ContactSettingController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ProfileController;
@@ -49,4 +50,9 @@ Route::middleware('auth:admin')->group(function () {
     // Privacy Settings
     Route::get('privacy-settings', [PrivacySettingController::class, 'show'])->name('privacy-settings.show');
     Route::put('privacy-settings', [PrivacySettingController::class, 'update'])->name('privacy-settings.update');
+
+    // Contact Us Messages
+    Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('contact-messages/{id}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::post('contact-messages/{id}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 });
