@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use App\Facades\MediaUpload;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminService extends BaseModelService
 {
@@ -81,6 +82,11 @@ class AdminService extends BaseModelService
     {
         return DB::transaction(function () use ($data, $id) {
             $avatarFile = Arr::pull($data, 'avatar');
+            $password = Arr::pull($data, 'password');
+
+            if ($password) {
+                $data['password'] = Hash::make($password);
+            }
 
             $admin = $this->repository->updateProfile($id, $data);
 

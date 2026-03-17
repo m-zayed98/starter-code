@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\User;
 use App\Enums\OtpPurpose;
 use App\Facades\ApiResponse;
 use App\Http\Controllers\Api\BaseAuthController;
+use App\Http\Requests\User\LogoutRequest;
 use App\Http\Requests\User\UserRegisterRequest;
 use App\Http\Requests\User\UserResendOtpRequest;
 use App\Http\Requests\User\UserVerifyOtpRequest;
@@ -76,5 +77,24 @@ class AuthController extends BaseAuthController
         $result = $service->resendOtp($data, $loginKey, $loginValue);
 
         return ApiResponse::respondWithArray($result)->send();
+    }
+
+    public function logout(LogoutRequest $request): JsonResponse
+    {
+        $user = auth($this->guard)->user();
+        if (! $user) {
+            return ApiResponse::respondWithError('Unauthenticated.', httpStatus: 401)->send();
+        }
+
+        $data = $request->validated();
+
+        $token = $user->currentAccessToken();
+        $token?->delete();
+
+        if (! empty($data['device_token'])) {
+            // TODO: remove device token association (persistence not implemented yet).
+        }
+
+        return ApiResponse::respondWithSuccess(message: __('Logged out successfully'))->send();
     }
 }

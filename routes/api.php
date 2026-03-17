@@ -25,6 +25,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('login', [UserAuthController::class, 'login'])->name('login');
     Route::post('verify-otp', [UserAuthController::class, 'verifyOtp'])->name('verify-otp');
     Route::post('resend-otp', [UserAuthController::class, 'resendOtp'])->name('resend-otp');
+    Route::post('logout', [UserAuthController::class, 'logout'])->middleware('auth:api')->name('logout');
 });
 
 // User Profile (authenticated)
