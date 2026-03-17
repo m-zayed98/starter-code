@@ -18,7 +18,7 @@ class PermissionsSeeder extends Seeder
 
     private function generateAdminPermissions(): void
     {
-        $entities = ['Admins', 'Roles'];
+        $entities = ['Admins', 'Roles', 'Users'];
         $actions  = ['read', 'create', 'update', 'delete'];
 
         PermissionGenerator::generate($entities, $actions, 'admin');
