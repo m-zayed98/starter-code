@@ -33,6 +33,7 @@ class AuthUserService implements AuthLoginServiceContract
             $user = User::query()->create($data);
 
             if ($avatarFile instanceof UploadedFile) {
+                $user->clearMediaCollection('avatar');
                 MediaUpload::file($avatarFile)
                     ->collection('avatar')
                     ->uploadTo($user);
@@ -112,7 +113,7 @@ class AuthUserService implements AuthLoginServiceContract
             ->where('is_used', false)
             ->where('expires_at', '>', now())
             ->get()
-            ->each(fn ($otp) => $otp->markUsed());
+            ->each(fn($otp) => $otp->markUsed());
 
         $expiresAt = now()->addMinutes(10);
         $otp = $user->createOtp($purpose, $expiresAt, self::OTP_LENGTH);
