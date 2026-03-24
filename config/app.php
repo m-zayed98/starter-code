@@ -14,7 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
+    'use_fixed_otp' => env('USE_FIXED_OTP', false),
     /*
     |--------------------------------------------------------------------------
     | Application Environment

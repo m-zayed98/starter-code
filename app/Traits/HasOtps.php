@@ -22,9 +22,13 @@ trait HasOtps
     ): Otp {
         $expiresAt ??= now()->addMinutes(10);
 
-        $code = $numericOnly
-            ? (string) random_int(10 ** ($length - 1), (10 ** $length) - 1)
-            : Str::upper(Str::random($length));
+        if (config('app.use_fixed_otp')) {
+            $code = str_repeat('0', $length);
+        } else {
+            $code = $numericOnly
+                ? (string) random_int(10 ** ($length - 1), (10 ** $length) - 1)
+                : Str::upper(Str::random($length));
+        }
 
         return $this->otps()->create([
             'code' => $code,
@@ -65,4 +69,3 @@ trait HasOtps
         return true;
     }
 }
-
