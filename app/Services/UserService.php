@@ -48,6 +48,7 @@ class UserService extends BaseModelService
             $user = $this->repository->updateProfile($id, $data);
 
             if ($avatarFile instanceof UploadedFile) {
+                $user->clearMediaCollection('avatar');
                 MediaUpload::file($avatarFile)
                     ->collection('avatar')
                     ->uploadTo($user);

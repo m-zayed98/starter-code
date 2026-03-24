@@ -33,7 +33,6 @@ class AuthUserService implements AuthLoginServiceContract
             $user = User::query()->create($data);
 
             if ($avatarFile instanceof UploadedFile) {
-                $user->clearMediaCollection('avatar');
                 MediaUpload::file($avatarFile)
                     ->collection('avatar')
                     ->uploadTo($user);
