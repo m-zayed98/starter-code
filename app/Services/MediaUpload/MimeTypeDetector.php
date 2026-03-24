@@ -19,16 +19,7 @@ use Illuminate\Http\UploadedFile;
 final class MimeTypeDetector
 {
     /** MIME types we can safely convert to WebP without quality/fidelity loss. */
-    private const WEBP_CONVERTIBLE_MIMES = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/bmp',
-        'image/tiff',
-        'image/x-tiff',
-        'image/x-bmp',
-        'image/x-ms-bmp',
-    ];
+    private const WEBP_CONVERTIBLE_MIMES = [];
 
     /**
      * Image MIME types that Intervention *can* read but we intentionally preserve
@@ -38,6 +29,14 @@ final class MimeTypeDetector
         'image/gif',
         'image/avif',
         'image/webp',
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/bmp',
+        'image/tiff',
+        'image/x-tiff',
+        'image/x-bmp',
+        'image/x-ms-bmp',
     ];
 
     public static function isWebpConvertible(UploadedFile $file): bool
