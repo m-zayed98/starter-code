@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             // User API Routes - Version 1
-            Route::middleware(['api'])
+            Route::middleware(['api', 'locale'])
                 ->prefix('api/v1/client')
                 ->name('client.v1.')
                 ->group(base_path('routes/api.php'));
@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'locale' => \App\Http\Middleware\SetLocaleFromRequest::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
