@@ -6,7 +6,7 @@ class RoleFilter extends BaseFilters
 {
     protected $filters = [
         'search',
-        'is_active',
+        'status',
     ];
 
     protected function search(string $value): void
@@ -14,8 +14,9 @@ class RoleFilter extends BaseFilters
         $this->builder->where('name', 'like', "%{$value}%");
     }
 
-    protected function isActive(string $value): void
+    protected function status($value)
     {
-        $this->builder->where('is_active', filter_var($value, FILTER_VALIDATE_BOOLEAN));
+        $status = $value === 'active' ? true : false;
+        $this->builder->where('is_active', $status);
     }
 }
