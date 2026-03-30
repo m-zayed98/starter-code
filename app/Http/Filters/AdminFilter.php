@@ -35,7 +35,7 @@ class AdminFilter extends BaseFilters
      */
     protected function status($value)
     {
-        $status = $value === 'active' ? true : false;
+        $status = strtolower($value) == 'active' ? true : false;
         $this->builder->where('is_active', $status);
     }
 }
