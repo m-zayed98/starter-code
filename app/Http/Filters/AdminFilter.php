@@ -11,8 +11,7 @@ class AdminFilter extends BaseFilters
      */
     protected $filters = [
         'search',
-        'status',
-        // Add more filters here
+        'is_active',
     ];
 
     /**
@@ -25,7 +24,6 @@ class AdminFilter extends BaseFilters
     {
         $this->builder->where(function ($query) use ($value) {
             $query->where('name', 'like', "%{$value}%");
-            // Add more searchable fields here
         });
     }
 
@@ -35,8 +33,8 @@ class AdminFilter extends BaseFilters
      * @param string $value
      * @return void
      */
-    protected function status($value)
+    protected function isActive($value)
     {
-        $this->builder->where('status', $value);
+        $this->builder->where('is_active', $value);
     }
 }

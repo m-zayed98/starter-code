@@ -35,8 +35,8 @@ class UserRegisterRequest extends FormRequest
             ],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'birth_date' => ['nullable', 'date'],
-            'identity_number' => ['nullable', 'string', 'max:50'],
+            // 'birth_date' => ['nullable', 'date'],
+            // 'identity_number' => ['nullable', 'string', 'max:50'],
         ];
     }
 
