@@ -21,7 +21,7 @@ class ValidMobilePhone implements ValidationRule
             $phone = phone($fullNumber);
 
             if (!$phone->isValid()) {
-                $fail('The :attribute is not a valid phone number for the given dial code.');
+                $fail(__('The :attribute is not a valid phone number for the given dial code.'));
                 return;
             }
 
@@ -33,10 +33,10 @@ class ValidMobilePhone implements ValidationRule
             ];
 
             if (!in_array($type, $mobileTypes)) {
-                $fail('The :attribute must be a mobile number.');
+                $fail(__('The :attribute must be a mobile number.'));
             }
         } catch (\Exception) {
-            $fail('The :attribute is not a valid mobile number for the given dial code.');
+            $fail(__('The :attribute is not a valid mobile number for the given dial code.'));
         }
     }
 }
