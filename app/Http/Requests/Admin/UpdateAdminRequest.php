@@ -34,7 +34,7 @@ class UpdateAdminRequest extends FormRequest
                 Rule::unique('admins', 'email')->ignore($adminId),
             ],
             'phone' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'avatar' => ['sometimes', 'nullable', 'image', 'max:2048'],
+            'avatar' => ['sometimes', 'nullable', 'image', 'max:10240'],
             'password' => ['sometimes', 'nullable', Password::defaults()],
             'is_active' => ['sometimes', 'boolean'],
             'role_id' => ['sometimes', 'integer', 'exists:roles,id'],

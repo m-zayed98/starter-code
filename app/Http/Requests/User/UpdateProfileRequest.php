@@ -38,7 +38,7 @@ class UpdateProfileRequest extends FormRequest
             ],
             // 'birth_date'      => ['nullable', 'date'],
             // 'identity_number' => ['nullable', 'string', 'max:50'],
-            'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
         ];
     }
 

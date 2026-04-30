@@ -34,7 +34,7 @@ class UserRegisterRequest extends FormRequest
                 new ValidMobilePhone($this->country_code)
             ],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
             // 'birth_date' => ['nullable', 'date'],
             // 'identity_number' => ['nullable', 'string', 'max:50'],
         ];
