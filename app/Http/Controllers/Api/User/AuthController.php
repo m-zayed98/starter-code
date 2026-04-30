@@ -45,7 +45,7 @@ class AuthController extends BaseAuthController
         try {
             $purpose = OtpPurpose::from($data['purpose']);
         } catch (\ValueError) {
-            return ApiResponse::respondWithError('Invalid OTP purpose.', httpStatus: 422)->send();
+            return ApiResponse::respondWithError(__('Invalid OTP purpose.'), httpStatus: 422)->send();
         }
 
         $query = User::query()->where($loginKey, $loginValue);
@@ -56,17 +56,17 @@ class AuthController extends BaseAuthController
         $user = $query->first();
 
         if (! $user || ! method_exists($user, 'consumeOtp')) {
-            return ApiResponse::respondWithError('Invalid user.', httpStatus: 404)->send();
+            return ApiResponse::respondWithError(__('Invalid user.'), httpStatus: 404)->send();
         }
 
         if (($user->status ?? null) === 'inactive') {
-            return ApiResponse::respondWithError('لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة', httpStatus: 403)->send();
+            return ApiResponse::respondWithError(__('Your account has been disabled. Please contact the administration.'), httpStatus: 403)->send();
         }
 
         $valid = $user->consumeOtp($purpose->value, $data['code']);
 
         if (! $valid) {
-            return ApiResponse::respondWithError('Invalid or expired OTP.', httpStatus: 422)->send();
+            return ApiResponse::respondWithError(__('Invalid or expired OTP.'), httpStatus: 422)->send();
         }
 
         $token = $user->createToken($this->guard)->plainTextToken;
@@ -92,7 +92,7 @@ class AuthController extends BaseAuthController
     {
         $user = auth($this->guard)->user();
         if (! $user) {
-            return ApiResponse::respondWithError('Unauthenticated.', httpStatus: 401)->send();
+            return ApiResponse::respondWithError(__('Unauthenticated.'), httpStatus: 401)->send();
         }
 
         $data = $request->validated();
