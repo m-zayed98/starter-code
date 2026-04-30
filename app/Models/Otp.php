@@ -10,12 +10,14 @@ class Otp extends Model
     protected $fillable = [
         'code',
         'purpose',
+        'additional_data',
         'is_used',
         'expires_at',
         'used_at',
     ];
 
     protected $casts = [
+        'additional_data' => 'array',
         'is_used' => 'boolean',
         'expires_at' => 'datetime',
         'used_at' => 'datetime',

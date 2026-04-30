@@ -16,6 +16,7 @@
     "Registration successful. Please verify OTP.": "Registration successful. Please verify OTP.",
     "OTP sent successfully.": "OTP sent successfully.",
     "New OTP sent successfully.": "New OTP sent successfully.",
+    "Phone number changed successfully.": "Phone number changed successfully.",
     "The :attribute is not a valid phone number for the given dial code.": "The :attribute is not a valid phone number for the given dial code.",
     "The :attribute must be a mobile number.": "The :attribute must be a mobile number.",
     "The :attribute is not a valid mobile number for the given dial code.": "The :attribute is not a valid mobile number for the given dial code.",

@@ -29,23 +29,9 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name'         => ['required', 'string', 'max:255'],
             'email'        => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
-            'country_code' => ['required', new ValidDialCode(), 'bail'],
-            'phone'        => [
-                'required',
-                'string',
-                Rule::unique('users', 'phone')->where('country_code', $this->country_code)->ignore($user?->id),
-                new ValidMobilePhone($this->country_code),
-            ],
             // 'birth_date'      => ['nullable', 'date'],
             // 'identity_number' => ['nullable', 'string', 'max:50'],
             'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'phone' => ltrim($this->input('phone', ''), '0'),
-        ]);
     }
 }

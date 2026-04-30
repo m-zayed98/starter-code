@@ -40,4 +40,6 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth:api')->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [UserProfileController::class, 'index'])->name('index');
     Route::put('/', [UserProfileController::class, 'update'])->name('update');
+    Route::post('change-phone', [UserAuthController::class, 'changePhone'])->name('change-phone');
+
 });

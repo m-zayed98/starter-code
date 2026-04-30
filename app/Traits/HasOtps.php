@@ -18,7 +18,8 @@ trait HasOtps
         string $purpose,
         ?Carbon $expiresAt = null,
         int $length = 6,
-        bool $numericOnly = true
+        bool $numericOnly = true,
+        ?array $additionalData = null
     ): Otp {
         $expiresAt ??= now()->addMinutes(10);
 
@@ -31,11 +32,12 @@ trait HasOtps
         }
 
         return $this->otps()->create([
-            'code' => $code,
-            'purpose' => $purpose,
-            'is_used' => false,
-            'expires_at' => $expiresAt,
-            'used_at' => null,
+            'code'            => $code,
+            'purpose'         => $purpose,
+            'additional_data' => $additionalData,
+            'is_used'         => false,
+            'expires_at'      => $expiresAt,
+            'used_at'         => null,
         ]);
     }
 
@@ -49,7 +51,7 @@ trait HasOtps
             ->first();
     }
 
-    public function consumeOtp(string $purpose, string $code): bool
+    public function consumeOtp(string $purpose, string $code): ?Otp
     {
         /** @var Otp|null $otp */
         $otp = $this->otps()
@@ -61,11 +63,11 @@ trait HasOtps
             ->first();
 
         if (!$otp) {
-            return false;
+            return null;
         }
 
         $otp->markUsed();
 
-        return true;
+        return $otp;
     }
 }

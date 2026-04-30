@@ -26,7 +26,6 @@ class ValidMobilePhone implements ValidationRule
             }
 
             $type = $phone->getType();
-
             $mobileTypes = [
                 PhoneNumberType::MOBILE,
                 PhoneNumberType::FIXED_LINE_OR_MOBILE,
