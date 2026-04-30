@@ -195,6 +195,15 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'name'         => 'Name',
+        'email'        => 'Email Address',
+        'phone'        => 'Phone Number',
+        'country_code' => 'Country Code',
+        'avatar'       => 'Avatar',
+        'password'     => 'Password',
+        'is_active'    => 'Active Status',
+        'role_id'      => 'Role',
+    ],
 
 ];
