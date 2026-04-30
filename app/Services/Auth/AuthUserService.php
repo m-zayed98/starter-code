@@ -47,7 +47,7 @@ class AuthUserService implements AuthLoginServiceContract
         $otp = $user->latestValidOtp(OtpPurpose::REGISTER->value);
 
         return [
-            'message' => 'Registration successful. Please verify OTP.',
+            'message' => __('Registration successful. Please verify OTP.'),
             'user' => UserResource::make($user),
             'expires_at' => $otp?->expires_at?->toIso8601String(),
             'purpose' => OtpPurpose::REGISTER->value,
@@ -76,7 +76,7 @@ class AuthUserService implements AuthLoginServiceContract
         );
 
         return [
-            'message' => 'OTP sent successfully.',
+            'message' => __('OTP sent successfully.'),
             'user' => UserResource::make($result['user']),
             'expires_at' => $result['expires_at']->toIso8601String(),
             'purpose' => $result['purpose'],
@@ -103,7 +103,7 @@ class AuthUserService implements AuthLoginServiceContract
 
         if (! $user || ! method_exists($user, 'otps')) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                $loginKey => ['User not found.'],
+                $loginKey => [__('User not found.')],
             ]);
         }
 
@@ -118,7 +118,7 @@ class AuthUserService implements AuthLoginServiceContract
         $otp = $user->createOtp($purpose, $expiresAt, self::OTP_LENGTH);
 
         return [
-            'message' => 'New OTP sent successfully.',
+            'message' => __('New OTP sent successfully.'),
             'expires_at' => $otp->expires_at->toIso8601String(),
             'purpose' => $purpose,
             'otp' => $otp->code,

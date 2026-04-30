@@ -22,7 +22,7 @@ class UsingOtpLoginStrategy implements LoginStrategy
 
         if (!is_string($loginValue) || $loginValue === '') {
             throw ValidationException::withMessages([
-                $loginKey => ['Invalid credentials.'],
+                $loginKey => [__('Invalid credentials.')],
             ]);
         }
 
@@ -39,13 +39,13 @@ class UsingOtpLoginStrategy implements LoginStrategy
 
         if (!$user) {
             throw ValidationException::withMessages([
-                $loginKey => ['Invalid credentials.'],
+                $loginKey => [__('Invalid credentials.')],
             ]);
         }
 
         if (property_exists($user, 'status') && ($user->status ?? null) === 'inactive') {
             throw ValidationException::withMessages([
-                $loginKey => ['لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة'],
+                $loginKey => [__('Your account has been disabled. Please contact the administration.')],
             ]);
         }
 

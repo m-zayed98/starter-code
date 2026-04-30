@@ -16,7 +16,7 @@ class UsingPasswordLoginStrategy implements LoginStrategy
 
         if (!is_string($loginValue) || $loginValue === '' || !is_string($password) || $password === '') {
             throw ValidationException::withMessages([
-                $loginKey => ['Invalid credentials.'],
+                $loginKey => [__('Invalid credentials.')],
             ]);
         }
 
@@ -25,7 +25,7 @@ class UsingPasswordLoginStrategy implements LoginStrategy
 
         if (!$user || !Hash::check($password, (string) $user->getAuthPassword())) {
             throw ValidationException::withMessages([
-                $loginKey => ['Invalid credentials.'],
+                $loginKey => [__('Invalid credentials.')],
             ]);
         }
         $token = method_exists($user, 'createToken')
