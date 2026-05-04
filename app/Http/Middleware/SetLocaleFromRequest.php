@@ -13,7 +13,7 @@ class SetLocaleFromRequest
     /**
      * Locales the API accepts from X-Locale or Accept-Language. Others fall back to default.
      *
-     * @var list<string>
+     * @var list<string>s
      */
     private const SUPPORTED = ['ar', 'en'];
 

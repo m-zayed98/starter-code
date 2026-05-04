@@ -25,7 +25,7 @@ return [
     'between'              => [
         'numeric' => 'يجب أن تكون قيمة :attribute بين :min و :max.',
         'file'    => 'يجب أن يكون حجم الملف :attribute بين :min و :max كيلوبايت.',
-        'string'  => 'يجب أن يكون عدد حروف النّص :attribute بين :min و :max',
+        'string'  => 'يجب أن يكون طول :attribute بين :min و :max حرفًا.',
         'array'   => 'يجب أن يحتوي :attribute على عدد من العناصر بين :min و :max',
     ],
     'boolean'              => 'يجب أن تكون قيمة :attribute إما true أو false ',
@@ -42,7 +42,7 @@ return [
     'file'                 => 'الـ :attribute يجب أن يكون ملفا.',
     'filled'               => ':attribute إجباري',
     'gt'                   => [
-        'numeric' => 'يجب أن تكون قيمة :attribute أكبر من :max.',
+        'numeric' => 'لا يمكن أن تكون قيمة :attribute صفراً أو سالبة.',
         'file'    => 'يجب أن يكون حجم الملف :attribute أكبر من :value كيلوبايت',
         'string'  => 'يجب أن يكون طول النّص :attribute أكثر من :value حروفٍ/حرفًا',
         'array'   => 'يجب أن يحتوي :attribute على أكثر من :value عناصر/عنصر.',
@@ -174,5 +174,14 @@ return [
         'time'                  => 'الوقت',
         'available'             => 'مُتاح',
         'size'                  => 'الحجم',
+        'type'                  => 'نوع الباقة',
+        'ads_count'             => 'عدد الإعلانات',
+        'duration_days'         => 'مدة الباقة (بالأيام)',
+        'price'                 => 'السعر',
+        'start_date'            => 'تاريخ البداية',
+        'end_date'              => 'تاريخ النهاية',
+        'max_subscribers'       => 'الحد الأقصى للمشتركين',
+        'name.en'               => 'الاسم (بالإنجليزية)',
+        'name.ar'               => 'الاسم (بالعربية)',
     ],
 ];

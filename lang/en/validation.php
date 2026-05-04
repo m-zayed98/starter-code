@@ -196,14 +196,23 @@ return [
     */
 
     'attributes' => [
-        'name'         => 'Name',
-        'email'        => 'Email Address',
-        'phone'        => 'Phone Number',
-        'country_code' => 'Country Code',
-        'avatar'       => 'Avatar',
-        'password'     => 'Password',
-        'is_active'    => 'Active Status',
-        'role_id'      => 'Role',
+        'name'            => 'Name',
+        'email'           => 'Email Address',
+        'phone'           => 'Phone Number',
+        'country_code'    => 'Country Code',
+        'avatar'          => 'Avatar',
+        'password'        => 'Password',
+        'is_active'       => 'Active Status',
+        'role_id'         => 'Role',
+        'type'            => 'Package Type',
+        'ads_count'       => 'Ads Count',
+        'duration_days'   => 'Duration (Days)',
+        'price'           => 'Price',
+        'start_date'      => 'Start Date',
+        'end_date'        => 'End Date',
+        'max_subscribers' => 'Max Subscribers',
+        'name.en'         => 'Name (English)',
+        'name.ar'         => 'Name (Arabic)',
     ],
 
 ];

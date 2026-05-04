@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdPackageController;
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AboutUsSettingController;
 use App\Http\Controllers\Api\Admin\AuthController;
@@ -62,4 +63,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     Route::get('contact-messages/{id}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
     Route::post('contact-messages/{id}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
+
+    // Advertising Packages
+    Route::apiResource('ad-packages', AdPackageController::class);
+    Route::put('ad-packages/{id}/toggle-status', [AdPackageController::class, 'toggleStatus'])->name('ad-packages.toggle-status');
 });

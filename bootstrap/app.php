@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/api.php'));
 
             // Admin API Routes - Version 1
-            Route::middleware(['api'])
+            Route::middleware(['api' , 'locale'])
                 ->prefix('api/v1/admin')
                 ->name('admin.v1.')
                 ->group(base_path('routes/admin.php'));
