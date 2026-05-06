@@ -35,5 +35,18 @@
     "offer": "Offer",
     "Notification sent successfully.": "Notification sent successfully.",
     "Only pending notifications can be deleted.": "Only pending notifications can be deleted.",
-    "Deleted successfully": "Deleted successfully"
+    "Deleted successfully": "Deleted successfully",
+    "Start date is required when free period is enabled": "Start date is required when free period is enabled",
+    "Start date must be current time or later": "Start date must be current time or later",
+    "End date is required when free period is enabled": "End date is required when free period is enabled",
+    "End date must be after start date": "End date must be after start date",
+    "Arabic reason is required when free period is enabled": "Arabic reason is required when free period is enabled",
+    "Arabic reason must be at least 10 characters": "Arabic reason must be at least 10 characters",
+    "Arabic reason must not exceed 500 characters": "Arabic reason must not exceed 500 characters",
+    "English reason is required when free period is enabled": "English reason is required when free period is enabled",
+    "English reason must be at least 10 characters": "English reason must be at least 10 characters",
+    "English reason must not exceed 500 characters": "English reason must not exceed 500 characters",
+    "Notification not found": "Notification not found",
+    "Notification marked as read": "Notification marked as read",
+    "All notifications marked as read": "All notifications marked as read"
 }

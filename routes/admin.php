@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\BlogController;
 use App\Http\Controllers\Api\Admin\ContactMessageController;
 use App\Http\Controllers\Api\Admin\ContactSettingController;
+use App\Http\Controllers\Api\Admin\GeneralSettingController;
 use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\PrivacySettingController;
@@ -61,6 +62,10 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('privacy-settings', [PrivacySettingController::class, 'show'])->name('privacy-settings.show');
     Route::put('privacy-settings', [PrivacySettingController::class, 'update'])->name('privacy-settings.update');
 
+    // General Settings
+    Route::get('general-settings', [GeneralSettingController::class, 'show'])->name('general-settings.show');
+    Route::put('general-settings', [GeneralSettingController::class, 'update'])->name('general-settings.update');
+
     // Contact Us Messages
     Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
     Route::get('contact-messages/{id}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
@@ -79,4 +84,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::put('blogs/{id}/toggle-status', [BlogController::class, 'toggleStatus'])->name('blogs.toggle-status');
     Route::put('comments/{commentId}/toggle-visibility', [BlogController::class, 'toggleCommentVisibility'])->name('comments.toggle-visibility');
     Route::delete('comments/{commentId}', [BlogController::class, 'destroyComment'])->name('comments.destroy');
+
+    // Notifications (Admin)
+    require __DIR__ . '/notifications.php';
 });

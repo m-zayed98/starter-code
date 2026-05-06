@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Client\AboutUsController;
 use App\Http\Controllers\Api\Client\BlogController;
 use App\Http\Controllers\Api\Client\ContactController;
 use App\Http\Controllers\Api\Client\ContactUsController;
+use App\Http\Controllers\Api\Client\GeneralSettingController;
 use App\Http\Controllers\Api\Client\PrivacyController;
 use App\Http\Controllers\Api\Client\TermsAndCondiotionsController;
 use App\Http\Controllers\Api\User\AuthController as UserAuthController;
@@ -26,6 +27,7 @@ Route::get('contact', [ContactController::class, 'index'])->name('contact.index'
 Route::get('about-us', [AboutUsController::class, 'index'])->name('about-us.index');
 Route::get('terms', [TermsAndCondiotionsController::class, 'index'])->name('terms-and-conditions.index');
 Route::get('privacy', [PrivacyController::class, 'index'])->name('privacy.index');
+Route::get('general-settings', [GeneralSettingController::class, 'index'])->name('general-settings.index');
 Route::post('contact-us', [ContactUsController::class, 'store'])->name('contact-us.store');
 
 // Blogs (Public)
@@ -51,5 +53,9 @@ Route::middleware('auth:api')->prefix('profile')->name('profile.')->group(functi
     Route::get('/', [UserProfileController::class, 'index'])->name('index');
     Route::put('/', [UserProfileController::class, 'update'])->name('update');
     Route::post('change-phone', [UserAuthController::class, 'changePhone'])->name('change-phone');
+});
 
+// Notifications (User)
+Route::middleware('auth:api')->group(function () {
+    require __DIR__ . '/notifications.php';
 });

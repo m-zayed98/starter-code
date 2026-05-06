@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\NotificationType;
 use App\Models\NotificationGroup;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,6 +31,7 @@ class AdminNotification extends Notification implements ShouldQueue
             'notification_group_id' => $this->group->id,
             'title'                 => $this->group->getTranslations('title'),
             'body'                  => $this->group->getTranslations('body'),
+            'type'                  => NotificationType::ADMIN_NOTIFICATION->value,
         ];
     }
 
@@ -42,6 +44,7 @@ class AdminNotification extends Notification implements ShouldQueue
                 'notification_group_id' => (string) $this->group->id,
                 'title'                 => $this->group->getTranslation('title', $locale),
                 'body'                  => $this->group->getTranslation('body', $locale),
+                'type'                  => NotificationType::ADMIN_NOTIFICATION->value,
             ]);
     }
 }
