@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AdPackageController;
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AboutUsSettingController;
 use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\BlogController;
 use App\Http\Controllers\Api\Admin\ContactMessageController;
 use App\Http\Controllers\Api\Admin\ContactSettingController;
 use App\Http\Controllers\Api\Admin\PermissionController;
@@ -72,4 +73,10 @@ Route::middleware('auth:admin')->group(function () {
     // Grouped Notifications
     Route::apiResource('notification-groups', NotificationGroupController::class)
         ->only(['index', 'store', 'show', 'destroy']);
+
+    // Blog Management
+    Route::apiResource('blogs', BlogController::class);
+    Route::put('blogs/{id}/toggle-status', [BlogController::class, 'toggleStatus'])->name('blogs.toggle-status');
+    Route::put('comments/{commentId}/toggle-visibility', [BlogController::class, 'toggleCommentVisibility'])->name('comments.toggle-visibility');
+    Route::delete('comments/{commentId}', [BlogController::class, 'destroyComment'])->name('comments.destroy');
 });

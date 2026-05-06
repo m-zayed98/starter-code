@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Client\AboutUsController;
+use App\Http\Controllers\Api\Client\BlogController;
 use App\Http\Controllers\Api\Client\ContactController;
 use App\Http\Controllers\Api\Client\ContactUsController;
 use App\Http\Controllers\Api\Client\PrivacyController;
@@ -26,6 +27,15 @@ Route::get('about-us', [AboutUsController::class, 'index'])->name('about-us.inde
 Route::get('terms', [TermsAndCondiotionsController::class, 'index'])->name('terms-and-conditions.index');
 Route::get('privacy', [PrivacyController::class, 'index'])->name('privacy.index');
 Route::post('contact-us', [ContactUsController::class, 'store'])->name('contact-us.store');
+
+// Blogs (Public)
+Route::get('blogs', [BlogController::class, 'index'])->name('blogs.index');
+Route::get('blogs/{id}', [BlogController::class, 'show'])->name('blogs.show');
+
+// Blog Comments (Authenticated Users)
+Route::middleware('auth:api')->group(function () {
+    Route::post('blogs/{id}/comments', [BlogController::class, 'storeComment'])->name('blogs.comments.store');
+});
 
 // User Authentication (OTP-based)
 Route::prefix('auth')->name('auth.')->group(function () {
