@@ -32,5 +32,8 @@
     "We received your message:": "لقد استلمنا رسالتك:",
     "Our reply:": "ردنا:",
     "normal": "عادية",
-    "offer": "عرض"
+    "offer": "عرض",
+    "Notification sent successfully.": "تم إرسال الإشعار بنجاح.",
+    "Only pending notifications can be deleted.": "لا يمكن حذف الإشعارات إلا إذا كانت في حالة الانتظار.",
+    "Deleted successfully": "تم الحذف بنجاح"
 }

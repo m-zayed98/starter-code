@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\PrivacySettingController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\TermsAndCondiotionsSettingController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\NotificationGroupController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication
@@ -67,4 +68,8 @@ Route::middleware('auth:admin')->group(function () {
     // Advertising Packages
     Route::apiResource('ad-packages', AdPackageController::class);
     Route::put('ad-packages/{id}/toggle-status', [AdPackageController::class, 'toggleStatus'])->name('ad-packages.toggle-status');
+
+    // Grouped Notifications
+    Route::apiResource('notification-groups', NotificationGroupController::class)
+        ->only(['index', 'store', 'show', 'destroy']);
 });

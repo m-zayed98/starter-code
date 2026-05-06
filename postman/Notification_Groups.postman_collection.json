@@ -1,0 +1,193 @@
+{
+  "info": {
+    "name": "Admin — Notification Groups",
+    "_postman_id": "notification-groups-collection",
+    "description": "CRUD for the admin notification-groups endpoint. All requests require a Bearer token obtained from POST /api/admin/auth/login.\n\nSet the collection variable `base_url` to your app URL (e.g. http://localhost) and `admin_token` to the token returned by the login endpoint.\n\n**Implementation Details:**\n- Uses standard Laravel notifications (database + Firebase FCM)\n- Notifications are queued via SendGroupNotificationJob\n- notification_group_id stored in notifications.data JSON column\n- Supports translatable title and body (en/ar)\n- Status flow: pending → sending → sent (or failed)\n- Only pending notifications can be deleted",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notification_group_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{admin_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "List Notification Groups",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Accept-Language", "value": "en" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/notification-groups?per_page=15&order_by=created_at&order_direction=desc&search=&status=",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "notification-groups"],
+          "query": [
+            { "key": "per_page", "value": "15", "description": "Items per page (omit or set paginate=false for full list)" },
+            { "key": "paginate", "value": "true", "description": "Set to false to return all without pagination", "disabled": true },
+            { "key": "order_by", "value": "created_at" },
+            { "key": "order_direction", "value": "desc" },
+            { "key": "search", "value": "", "description": "Search in title (en/ar) and body (en/ar) using LIKE" },
+            { "key": "status", "value": "", "description": "Filter by status: pending, sending, sent, failed" }
+          ]
+        },
+        "description": "Returns a paginated list of notification groups with creator info and recipient count.\n\n**Filters:**\n- `search`: Searches in title (en/ar) and body (en/ar) using LIKE pattern\n- `status`: Filter by status (pending, sending, sent, failed)\n- `order_by`: Sort by column (default: created_at)\n- `order_direction`: Sort direction (asc/desc, default: desc)"
+      },
+      "response": [
+        {
+          "name": "200 OK — paginated list",
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"success\",\n  \"status_code\": \"1000\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": 1,\n        \"title\": \"Test Notification\",\n        \"title_ar\": \"إشعار تجريبي\",\n        \"title_en\": \"Test Notification\",\n        \"body\": \"This is a test body\",\n        \"body_ar\": \"هذا نص تجريبي\",\n        \"body_en\": \"This is a test body\",\n        \"status\": \"sent\",\n        \"sent_at\": \"2026-05-06 10:00\",\n        \"created_at\": \"2026-05-06 09:58\",\n        \"creator\": { \"id\": 1, \"name\": \"Super Admin\", \"email\": \"admin@example.com\" },\n        \"recipients_count\": 3\n      }\n    ],\n    \"links\": {},\n    \"meta\": {}\n  },\n  \"errors\": []\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create & Send Notification Group",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.data && res.data.id) {",
+              "  pm.collectionVariables.set('notification_group_id', res.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Accept-Language", "value": "en" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": {\n    \"en\": \"Welcome Offer\",\n    \"ar\": \"عرض ترحيبي\"\n  },\n  \"body\": {\n    \"en\": \"Check out our latest advertising packages!\",\n    \"ar\": \"تحقق من أحدث باقات الإعلانات لدينا!\"\n  },\n  \"user_ids\": [1, 2, 3]\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/admin/notification-groups",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "notification-groups"]
+        },
+        "description": "Creates a notification group and immediately dispatches it to the queue (SendGroupNotificationJob). The group is sent via both database and Firebase FCM channels.\n\n**Notes:**\n- `title` and `body` are translatable — both `en` and `ar` are required.\n- `user_ids` must be an array of existing user IDs (min 1, no duplicates).\n- The job is queued; status starts as `pending` then transitions to `sending` → `sent` (or `failed`).\n- Firebase FCM is sent per-user using the user's locale if available."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"Notification sent successfully.\",\n  \"status_code\": \"1000\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Welcome Offer\",\n    \"title_ar\": \"عرض ترحيبي\",\n    \"title_en\": \"Welcome Offer\",\n    \"body\": \"Check out our latest advertising packages!\",\n    \"body_ar\": \"تحقق من أحدث باقات الإعلانات لدينا!\",\n    \"body_en\": \"Check out our latest advertising packages!\",\n    \"status\": \"pending\",\n    \"sent_at\": null,\n    \"created_at\": \"2026-05-06 10:00\",\n    \"creator\": { \"id\": 1, \"name\": \"Super Admin\", \"email\": \"admin@example.com\" },\n    \"recipients_count\": 3\n  },\n  \"errors\": []\n}"
+        },
+        {
+          "name": "422 Validation Error",
+          "status": "Unprocessable Entity",
+          "code": 422,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"The title field is required.\",\n  \"status_code\": \"1001\",\n  \"data\": [],\n  \"errors\": {\n    \"title\": [\"The title field is required.\"],\n    \"user_ids\": [\"The user ids field is required.\"]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Show Notification Group",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Accept-Language", "value": "en" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/notification-groups/{{notification_group_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "notification-groups", "{{notification_group_id}}"]
+        },
+        "description": "Returns full details of a notification group including the full recipients list (user objects) and creator info."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"success\",\n  \"status_code\": \"1000\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Welcome Offer\",\n    \"title_ar\": \"عرض ترحيبي\",\n    \"title_en\": \"Welcome Offer\",\n    \"body\": \"Check out our latest advertising packages!\",\n    \"body_ar\": \"تحقق من أحدث باقات الإعلانات لدينا!\",\n    \"body_en\": \"Check out our latest advertising packages!\",\n    \"status\": \"sent\",\n    \"sent_at\": \"2026-05-06 10:01\",\n    \"created_at\": \"2026-05-06 10:00\",\n    \"creator\": { \"id\": 1, \"name\": \"Super Admin\", \"email\": \"admin@example.com\" },\n    \"recipients_count\": 3,\n    \"recipients\": [\n      { \"id\": 1, \"name\": \"User One\", \"email\": \"user1@example.com\" },\n      { \"id\": 2, \"name\": \"User Two\", \"email\": \"user2@example.com\" },\n      { \"id\": 3, \"name\": \"User Three\", \"email\": \"user3@example.com\" }\n    ]\n  },\n  \"errors\": []\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"No query results for model [App\\\\Models\\\\NotificationGroup].\",\n  \"status_code\": \"1001\",\n  \"data\": [],\n  \"errors\": []\n}"
+        }
+      ]
+    },
+    {
+      "name": "Delete Notification Group (pending only)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Accept-Language", "value": "en" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/notification-groups/{{notification_group_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "notification-groups", "{{notification_group_id}}"]
+        },
+        "description": "Permanently deletes a notification group. Only groups with status `pending` can be deleted. Groups that are `sending`, `sent`, or `failed` return 422."
+      },
+      "response": [
+        {
+          "name": "200 OK — deleted",
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"Deleted successfully\",\n  \"status_code\": \"1000\",\n  \"data\": [],\n  \"errors\": []\n}"
+        },
+        {
+          "name": "422 — not pending",
+          "status": "Unprocessable Entity",
+          "code": 422,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"Only pending notifications can be deleted.\",\n  \"status_code\": \"1001\",\n  \"data\": [],\n  \"errors\": []\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"message\": \"No query results for model [App\\\\Models\\\\NotificationGroup].\",\n  \"status_code\": \"1001\",\n  \"data\": [],\n  \"errors\": []\n}"
+        }
+      ]
+    }
+  ]
+}

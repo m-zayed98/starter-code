@@ -32,5 +32,8 @@
     "We received your message:": "We received your message:",
     "Our reply:": "Our reply:",
     "normal": "Normal",
-    "offer": "Offer"
+    "offer": "Offer",
+    "Notification sent successfully.": "Notification sent successfully.",
+    "Only pending notifications can be deleted.": "Only pending notifications can be deleted.",
+    "Deleted successfully": "Deleted successfully"
 }
