@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class AdPackage extends Model
+class AdPackage extends Model implements HasMedia
 {
     use HasFactory;
     use HasTranslations;
+    use InteractsWithMedia;
 
     public array $translatable = ['name'];
 
@@ -38,6 +41,14 @@ class AdPackage extends Model
             'start_date' => 'date',
             'end_date'   => 'date',
         ];
+    }
+
+    // ─── Media Collections ────────────────────────────────────────────────
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image')
+            ->singleFile();
     }
 
     // ─── Relationships ────────────────────────────────────────────────────
@@ -110,14 +121,12 @@ class AdPackage extends Model
     {
         return $query->where('is_active', true)
             ->where(function (Builder $q) use ($userId) {
-                // Normal packages always visible
                 $q->where('type', AdPackageType::NORMAL)
                     ->orWhere(function (Builder $offerQuery) use ($userId) {
                         $offerQuery->where('type', AdPackageType::OFFER)
                             ->where('start_date', '<=', now()->toDateString())
                             ->where('end_date', '>=', now()->toDateString())
                             ->where(function (Builder $capQuery) use ($userId) {
-                                // Either cap not reached OR user is already subscribed
                                 $capQuery->whereRaw(
                                     '(max_subscribers IS NULL OR (
                                         SELECT COUNT(*) FROM subscriptions

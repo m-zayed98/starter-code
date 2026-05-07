@@ -23,6 +23,7 @@ class UpdateAdPackageRequest extends FormRequest
             'ads_count'       => ['required', 'integer', 'gt:0'],
             'duration_days'   => ['required', 'integer', 'min:1', 'max:1000'],
             'price'           => ['required', 'numeric', 'gt:0'],
+            'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'start_date'      => ['required_if:type,offer', 'nullable', 'date', 'after_or_equal:today'],
             'end_date'        => ['required_if:type,offer', 'nullable', 'date', 'after:start_date'],
             'max_subscribers' => ['required_if:type,offer', 'nullable', 'integer', 'min:1'],

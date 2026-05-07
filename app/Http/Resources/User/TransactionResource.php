@@ -17,16 +17,17 @@ class TransactionResource extends JsonResource
         $locale = app()->getLocale();
 
         return [
-            'id'        => $this->id,
-            'amount'    => $this->amount,
-            'status'    => $this->status->value,
+            'id'           => $this->id,
+            'amount'       => $this->amount,
+            'status'       => $this->status->value,
             'status_label' => $this->status->label(),
-            'reference' => $this->reference,
-            'package'   => $this->whenLoaded('transactionable', function () use ($locale) {
+            'reference'    => $this->reference,
+            'package'      => $this->whenLoaded('transactionable', function () use ($locale) {
                 return [
-                    'id'   => $this->transactionable->id,
-                    'name' => $this->transactionable->getTranslation('name', $locale),
-                    'type' => $this->transactionable->type->value,
+                    'id'    => $this->transactionable->id,
+                    'name'  => $this->transactionable->getTranslation('name', $locale),
+                    'type'  => $this->transactionable->type->value,
+                    'image' => $this->transactionable->getFirstMediaUrl('image') ?: null,
                 ];
             }),
             'created_at' => $this->created_at?->format('Y-m-d H:i'),

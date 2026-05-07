@@ -31,13 +31,14 @@ class SubscriptionResource extends JsonResource
             'can_be_used'     => $this->canBeUsed(),
             'package'         => $this->whenLoaded('adPackage', function () use ($locale) {
                 return [
-                    'id'           => $this->adPackage->id,
-                    'name'         => $this->adPackage->getTranslation('name', $locale),
-                    'type'         => $this->adPackage->type->value,
-                    'duration_days'=> $this->adPackage->duration_days,
+                    'id'            => $this->adPackage->id,
+                    'name'          => $this->adPackage->getTranslation('name', $locale),
+                    'type'          => $this->adPackage->type->value,
+                    'duration_days' => $this->adPackage->duration_days,
+                    'image'         => $this->adPackage->getFirstMediaUrl('image') ?: null,
                 ];
             }),
-            'created_at'      => $this->created_at?->format('Y-m-d H:i'),
+            'created_at' => $this->created_at?->format('Y-m-d H:i'),
         ];
     }
 }

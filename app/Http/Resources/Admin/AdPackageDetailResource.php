@@ -16,18 +16,19 @@ class AdPackageDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = [
-            'id'                 => $this->id,
-            'name'               => $this->name,
-            'name_ar'            => $this->getTranslation('name', 'ar'),
-            'name_en'            => $this->getTranslation('name', 'en'),
-            'type'               => $this->type->value,
-            'type_label'         => $this->type->label(),
-            'price'              => $this->price,
-            'ads_count'          => $this->ads_count,
-            'duration_days'      => $this->duration_days,
-            'is_active'          => $this->is_active,
-            'subscribers_count'  => $this->activeSubscriptions->count(),
-            'created_at'         => $this->created_at?->format('Y-m-d H:i'),
+            'id'                => $this->id,
+            'name'              => $this->name,
+            'name_ar'           => $this->getTranslation('name', 'ar'),
+            'name_en'           => $this->getTranslation('name', 'en'),
+            'type'              => $this->type->value,
+            'type_label'        => $this->type->label(),
+            'price'             => $this->price,
+            'ads_count'         => $this->ads_count,
+            'duration_days'     => $this->duration_days,
+            'is_active'         => $this->is_active,
+            'image'             => $this->getFirstMediaUrl('image') ?: null,
+            'subscribers_count' => $this->activeSubscriptions->count(),
+            'created_at'        => $this->created_at?->format('Y-m-d H:i'),
         ];
 
         // Offer-only fields

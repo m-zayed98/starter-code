@@ -31,12 +31,12 @@ class AdPackageResource extends JsonResource
             'price'         => $this->price,
             'ads_count'     => $this->ads_count,
             'duration_days' => $this->duration_days,
+            'image'         => $this->getFirstMediaUrl('image') ?: null,
             'is_subscribed' => (bool) ($this->is_subscribed ?? false),
         ];
 
-        // ── Offer-specific fields ─────────────────────────────────────────
+
         if ($this->type === AdPackageType::OFFER) {
-            // activeSubscriptions is always eager-loaded by the repository
             $activeCount = $this->activeSubscriptions->count();
 
             $data['start_date']            = $this->start_date?->format('Y-m-d');
@@ -46,26 +46,6 @@ class AdPackageResource extends JsonResource
             $data['remaining_subscribers'] = $this->max_subscribers !== null
                 ? max(0, $this->max_subscribers - $activeCount)
                 : null;
-        }
-
-        // ── Active subscription block (only when user is subscribed) ──────
-        /** @var Subscription|null $sub */
-        $sub = $this->active_subscription ?? null;
-
-        if ($sub instanceof Subscription) {
-            $data['active_subscription'] = [
-                'id'              => $sub->id,
-                'ad_count'        => $sub->ad_count,
-                'user_ads_count'  => $sub->user_ads_count,
-                'remaining_quota' => $sub->remainingQuota(),
-                'usage_percent'   => $sub->usagePercent(),
-                'package_price'   => $sub->package_price,
-                'starts_at'       => $sub->starts_at?->format('Y-m-d'),
-                'expires_at'      => $sub->expires_at?->format('Y-m-d'),
-                'is_expired'      => $sub->isExpired(),
-                'status'          => $sub->status->value,
-                'status_label'    => $sub->status->label(),
-            ];
         }
 
         return $data;

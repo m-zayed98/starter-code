@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Facades\MediaUpload;
 use App\Repositories\Contracts\AdPackageRepositoryContract;
 use App\Repositories\DTOs\QueryOptions;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 
 /** @property AdPackageRepositoryContract $repository */
 class AdPackageService extends BaseModelService
@@ -32,21 +34,46 @@ class AdPackageService extends BaseModelService
     }
 
     /**
-     * Create a package and return it with activeSubscriptions loaded.
+     * Create a package with optional image upload.
+     * Returns the package with activeSubscriptions loaded.
      */
     public function create(array $data): Model
     {
+        // Extract the image file before persisting (not a DB column)
+        $imageFile = $data['image'] ?? null;
+        unset($data['image']);
+
         $package = $this->repository->create($data);
+
+        // Upload image if provided
+        if ($imageFile instanceof UploadedFile) {
+            MediaUpload::file($imageFile)
+                ->collection('image')
+                ->uploadTo($package);
+        }
 
         return $this->repository->showOrFail($package->id, ['relations' => ['activeSubscriptions']]);
     }
 
     /**
-     * Update a package and return it with activeSubscriptions loaded.
+     * Update a package with optional image replacement.
+     * Returns the package with activeSubscriptions loaded.
      */
     public function update(int $id, array $data): Model
     {
-        $this->repository->update($id, $data);
+        // Extract the image file before persisting (not a DB column)
+        $imageFile = $data['image'] ?? null;
+        unset($data['image']);
+
+        $package = $this->repository->update($id, $data);
+
+        // Replace image if a new one is provided
+        if ($imageFile instanceof UploadedFile) {
+            $package->clearMediaCollection('image');
+            MediaUpload::file($imageFile)
+                ->collection('image')
+                ->uploadTo($package);
+        }
 
         return $this->repository->showOrFail($id, ['relations' => ['activeSubscriptions']]);
     }
