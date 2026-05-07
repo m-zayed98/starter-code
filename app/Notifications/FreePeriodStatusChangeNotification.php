@@ -6,6 +6,9 @@ use App\Enums\NotificationType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class FreePeriodStatusChangeNotification extends Notification implements ShouldQueue
 {
@@ -21,9 +24,7 @@ class FreePeriodStatusChangeNotification extends Notification implements ShouldQ
 
     public function via(object $notifiable): array
     {
-        return ['database'];
-        // TODO: Add fcm channel when ready
-        // return ['database', FcmChannel::class];
+        return ['database', FcmChannel::class];
     }
 
     public function toDatabase(object $notifiable): array
@@ -31,23 +32,18 @@ class FreePeriodStatusChangeNotification extends Notification implements ShouldQ
         $locale = $notifiable->locale ?? app()->getLocale();
 
         if ($this->isEnabled) {
-            $titleAr = 'بدء فترة مجانية';
-            $titleEn = 'Free Period Started';
-            $bodyAr = $this->reasonAr ?? 'تم تفعيل فترة مجانية للتطبيق';
-            $bodyEn = $this->reasonEn ?? 'A free period has been activated for the application';
-
             return [
                 'title' => [
-                    'ar' => $titleAr,
-                    'en' => $titleEn,
+                    'ar' => 'بدء فترة مجانية',
+                    'en' => 'Free Period Started',
                 ],
                 'body' => [
-                    'ar' => $bodyAr,
-                    'en' => $bodyEn,
+                    'ar' => $this->reasonAr ?? 'تم تفعيل فترة مجانية للتطبيق',
+                    'en' => $this->reasonEn ?? 'A free period has been activated for the application',
                 ],
                 'start_date' => $this->startDate,
-                'end_date' => $this->endDate,
-                'type' => NotificationType::FREE_PERIOD_ENABLED->value,
+                'end_date'   => $this->endDate,
+                'type'       => NotificationType::FREE_PERIOD_ENABLED->value,
             ];
         }
 
@@ -64,39 +60,86 @@ class FreePeriodStatusChangeNotification extends Notification implements ShouldQ
         ];
     }
 
-    // Uncomment when FCM is ready
-    /*
     public function toFcm(object $notifiable): FcmMessage
     {
         $locale = $notifiable->locale ?? app()->getLocale();
 
         if ($this->isEnabled) {
             $title = $locale === 'ar' ? 'بدء فترة مجانية' : 'Free Period Started';
-            $body = $locale === 'ar' 
+            $body  = $locale === 'ar'
                 ? ($this->reasonAr ?? 'تم تفعيل فترة مجانية للتطبيق')
                 : ($this->reasonEn ?? 'A free period has been activated for the application');
 
-            return FcmMessage::create()
-                ->setData([
-                    'title' => $title,
-                    'body' => $body,
-                    'start_date' => $this->startDate,
-                    'end_date' => $this->endDate,
-                    'type' => NotificationType::FREE_PERIOD_ENABLED->value,
-                ]);
+            return (new FcmMessage(notification: new FcmNotification(
+                title: $title,
+                body: $body,
+            )))->data([
+                'title'      => $title,
+                'body'       => $body,
+                'start_date' => (string) ($this->startDate ?? ''),
+                'end_date'   => (string) ($this->endDate ?? ''),
+                'type'       => NotificationType::FREE_PERIOD_ENABLED->value,
+            ])->custom([
+                'android' => [
+                    'priority'     => 'high',
+                    'notification' => [
+                        'sound' => 'default',
+                    ],
+                    'fcm_options' => [
+                        'analytics_label' => 'free_period',
+                    ],
+                ],
+                'apns' => [
+                    'headers' => [
+                        'apns-priority' => '10',
+                    ],
+                    'payload' => [
+                        'aps' => [
+                            'sound' => 'default',
+                        ],
+                    ],
+                    'fcm_options' => [
+                        'analytics_label' => 'free_period',
+                    ],
+                ],
+            ]);
         }
 
         $title = $locale === 'ar' ? 'انتهاء الفترة المجانية' : 'Free Period Ended';
-        $body = $locale === 'ar' 
+        $body  = $locale === 'ar'
             ? 'تم إيقاف الفترة المجانية للتطبيق'
             : 'The free period for the application has been disabled';
 
-        return FcmMessage::create()
-            ->setData([
-                'title' => $title,
-                'body' => $body,
-                'type' => NotificationType::FREE_PERIOD_DISABLED->value,
-            ]);
+        return (new FcmMessage(notification: new FcmNotification(
+            title: $title,
+            body: $body,
+        )))->data([
+            'title' => $title,
+            'body'  => $body,
+            'type'  => NotificationType::FREE_PERIOD_DISABLED->value,
+        ])->custom([
+            'android' => [
+                'priority'     => 'high',
+                'notification' => [
+                    'sound' => 'default',
+                ],
+                'fcm_options' => [
+                    'analytics_label' => 'free_period',
+                ],
+            ],
+            'apns' => [
+                'headers' => [
+                    'apns-priority' => '10',
+                ],
+                'payload' => [
+                    'aps' => [
+                        'sound' => 'default',
+                    ],
+                ],
+                'fcm_options' => [
+                    'analytics_label' => 'free_period',
+                ],
+            ],
+        ]);
     }
-    */
 }

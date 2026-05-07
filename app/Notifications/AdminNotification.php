@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class AdminNotification extends Notification implements ShouldQueue
 {
@@ -20,8 +21,6 @@ class AdminNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
-        // TODO: Add fcm channel when ready
         return ['database', FcmChannel::class];
     }
 
@@ -39,12 +38,40 @@ class AdminNotification extends Notification implements ShouldQueue
     {
         $locale = $notifiable->locale ?? app()->getLocale();
 
-        return FcmMessage::create()
-            ->setData([
-                'notification_group_id' => (string) $this->group->id,
-                'title'                 => $this->group->getTranslation('title', $locale),
-                'body'                  => $this->group->getTranslation('body', $locale),
-                'type'                  => NotificationType::ADMIN_NOTIFICATION->value,
-            ]);
+        $title = $this->group->getTranslation('title', $locale);
+        $body  = $this->group->getTranslation('body', $locale);
+
+        return (new FcmMessage(notification: new FcmNotification(
+            title: $title,
+            body: $body,
+        )))->data([
+            'notification_group_id' => (string) $this->group->id,
+            'title'                 => $title,
+            'body'                  => $body,
+            'type'                  => NotificationType::ADMIN_NOTIFICATION->value,
+        ])->custom([
+            'android' => [
+                'priority'     => 'high',
+                'notification' => [
+                    'sound' => 'default',
+                ],
+                'fcm_options' => [
+                    'analytics_label' => 'admin_notification',
+                ],
+            ],
+            'apns' => [
+                'headers' => [
+                    'apns-priority' => '10',
+                ],
+                'payload' => [
+                    'aps' => [
+                        'sound' => 'default',
+                    ],
+                ],
+                'fcm_options' => [
+                    'analytics_label' => 'admin_notification',
+                ],
+            ],
+        ]);
     }
 }

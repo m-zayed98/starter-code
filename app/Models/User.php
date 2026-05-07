@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Traits\HasOtps;
@@ -102,6 +103,36 @@ class User extends Authenticatable implements HasMedia
 
 
 
+
+    /******************************* Relationships **************/
+
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
+    /******************************* FCM Routing **************/
+
+    /**
+     * Route notifications for the FCM channel.
+     * Returns all device tokens associated with this user.
+     *
+     * @return array<int, string>
+     */
+    public function routeNotificationForFcm(): array
+    {
+        return $this->getDeviceTokens();
+    }
+
+    /**
+     * Get all FCM device tokens for this user.
+     *
+     * @return array<int, string>
+     */
+    public function getDeviceTokens(): array
+    {
+        return $this->fcmTokens()->pluck('token')->all();
+    }
 
     /******************************* Attributes **************/
     public function fullPhone(): Attribute

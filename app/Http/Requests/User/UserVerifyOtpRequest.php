@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\OtpPurpose;
 use App\Rules\ValidDialCode;
 use App\Rules\ValidMobilePhone;
 use Illuminate\Foundation\Http\FormRequest;
@@ -24,6 +25,13 @@ class UserVerifyOtpRequest extends FormRequest
      */
     public function rules(): array
     {
+        $purposesRequiringFcmToken = [
+            OtpPurpose::REGISTER->value,
+            OtpPurpose::LOGIN->value,
+        ];
+
+        $fcmTokenRequired = in_array($this->input('purpose'), $purposesRequiringFcmToken, true);
+
         return [
             'email' => ['required_without:phone', 'nullable', 'string', 'email'],
             'country_code' => ['required_with:phone', 'nullable', new ValidDialCode(), 'bail'],
@@ -35,15 +43,17 @@ class UserVerifyOtpRequest extends FormRequest
             ],
             'code' => ['required', 'string', 'size:6'],
             'purpose' => ['required', 'string'],
+            'fcm_token' => [$fcmTokenRequired ? 'required' : 'nullable', 'string'],
+            'device_type' => ['nullable', 'string', Rule::in(['ios', 'android', 'web'])],
         ];
     }
-
 
     public function messages(): array
     {
         return [
             'email.required_without' => 'The email field is required.',
             'phone.required_without' => 'The phone field is required.',
+            'fcm_token.required' => 'The FCM token is required for login and registration.',
         ];
     }
 

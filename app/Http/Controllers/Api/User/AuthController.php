@@ -12,6 +12,7 @@ use App\Http\Requests\User\UserResendOtpRequest;
 use App\Http\Requests\User\UserVerifyOtpRequest;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
+use App\Repositories\Contracts\FcmTokenRepositoryContract;
 use App\Services\Auth\AuthUserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -92,6 +93,19 @@ class AuthController extends BaseAuthController
 
         $token = $user->createToken($this->guard)->plainTextToken;
 
+        // Store FCM token for login and register purposes
+        if (
+            in_array($purpose, [OtpPurpose::LOGIN, OtpPurpose::REGISTER], true)
+            && ! empty($data['fcm_token'])
+        ) {
+            $fcmTokenRepository = app(FcmTokenRepositoryContract::class);
+            $fcmTokenRepository->storeForUser(
+                $user->id,
+                $data['fcm_token'],
+                $data['device_type'] ?? null
+            );
+        }
+
         return ApiResponse::respondWithArray([
             'verified' => true,
             'user'     => UserResource::make($user),
@@ -154,7 +168,8 @@ class AuthController extends BaseAuthController
         $token?->delete();
 
         if (! empty($data['device_token'])) {
-            // TODO: remove device token association (persistence not implemented yet).
+            $fcmTokenRepository = app(FcmTokenRepositoryContract::class);
+            $fcmTokenRepository->deleteToken($data['device_token']);
         }
 
         return ApiResponse::respondWithSuccess(message: __('Logged out successfully'))->send();
