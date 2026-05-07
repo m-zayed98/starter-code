@@ -9,7 +9,6 @@ interface AdRepositoryContract extends RepositoryContract
 {
     /**
      * Check whether an ad with the given ad_license_number already exists.
-     * Used to prevent duplicate ads before calling NHC.
      */
     public function existsByAdLicenseNumber(string $adLicenseNumber): bool;
 
@@ -17,6 +16,17 @@ interface AdRepositoryContract extends RepositoryContract
      * Find an ad by its ad_license_number.
      */
     public function findByAdLicenseNumber(string $adLicenseNumber): ?Ad;
+
+    /**
+     * Return a paginated list of published ads for the public listing.
+     * Applies AdFilter, eager-loads media.
+     */
+    public function paginatePublished(int $perPage = 10): LengthAwarePaginator;
+
+    /**
+     * Find a single published ad by ID with full relations for detail view.
+     */
+    public function findPublishedWithDetails(int $adId): ?Ad;
 
     /**
      * Return a paginated list of ads belonging to a specific user.

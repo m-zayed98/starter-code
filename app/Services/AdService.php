@@ -110,7 +110,11 @@ class AdService
             $apartmentImages  = Arr::pull($data, 'apartment_images', []);
             $apartmentVideo   = Arr::pull($data, 'apartment_video');
 
-            // Persist scalar fields
+            // UpdateAdRequest validates ALL required fields — if we reach here
+            // the ad is complete, so promote it to published immediately.
+            $data['status'] = AdStatus::PUBLISHED->value;
+
+            // Persist scalar fields + status
             /** @var Ad $updated */
             $updated = $this->adRepository->update($ad->id, $data);
 

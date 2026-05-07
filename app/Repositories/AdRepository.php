@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Http\Filters\AdFilter;
+use App\Http\Filters\BaseFilters;
 use App\Models\Ad;
 use App\Repositories\Contracts\AdRepositoryContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -12,6 +14,11 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
     protected function resolveModel(): Model
     {
         return new Ad();
+    }
+
+    protected function resolveFilter(): ?BaseFilters
+    {
+        return app(AdFilter::class);
     }
 
     /**
@@ -31,6 +38,35 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
     {
         /** @var Ad|null */
         return $this->findBy('ad_license_number', $adLicenseNumber);
+    }
+
+    /**
+     * Return a paginated list of published ads for the public listing.
+     * Applies AdFilter, eager-loads cover image media only (card view).
+     */
+    public function paginatePublished(int $perPage = 10): LengthAwarePaginator
+    {
+        return $this->newQuery()
+            ->where('status', 'published')
+            ->with('media')
+            ->tap(fn ($q) => $this->applyFilters($q))
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    /**
+     * Find a single published ad by ID with full relations for detail view.
+     * Eager-loads user, media, reviews (with user), and reports count.
+     */
+    public function findPublishedWithDetails(int $adId): ?Ad
+    {
+        /** @var Ad|null */
+        return $this->newQuery()
+            ->where('id', $adId)
+            ->where('status', 'published')
+            ->with(['user', 'media', 'reviews.user'])
+            ->withCount('reports')
+            ->first();
     }
 
     /**

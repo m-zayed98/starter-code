@@ -1,0 +1,278 @@
+{
+  "info": {
+    "name": "Public Ads API",
+    "_postman_id": "public-ads-api-collection",
+    "description": "Public ad listing, detail, reviews and reports endpoints.\n\nBase URL variable: {{url}}\nAll endpoints are under: {{url}}/api/v1/client/public/ads\n\nAuth: Bearer {{user_token}} — set both variables in the Collection > Variables tab.\n\n──────────────────────────────────────\nFLOW\n──────────────────────────────────────\n1. GET  /public/ads          → List published ads (guests + auth, supports filters)\n2. GET  /public/ads/{id}     → Full detail of a single published ad\n3. POST /public/ads/{id}/reviews  → Submit a star rating + feedback (auth only, once per ad)\n4. POST /public/ads/{id}/reports  → Report an ad with a reason (auth only, once per ad)\n\n──────────────────────────────────────\nFILTER QUERY PARAMS (for listing)\n──────────────────────────────────────\nsearch             – full-text: title, description, advertiser name, region, city, district, property_type, fal/ad license\npurpose            – sale | rent\napartment_condition – new | used | under_construction\nrental_period      – daily | weekly | monthly | yearly\nfurnishing_status  – furnished | unfurnished\nprice_min          – numeric minimum price\nprice_max          – numeric maximum price\nproperty_type      – exact match on nhc_data->property_type (e.g. شقة)\nregion             – partial match on nhc_data->region\ncity               – partial match on nhc_data->city\ndistrict           – partial match on nhc_data->district",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost",
+      "type": "string",
+      "description": "Base URL e.g. http://localhost or https://api.yourdomain.com"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string",
+      "description": "Sanctum bearer token for the authenticated user (required for reviews and reports)"
+    },
+    {
+      "key": "ad_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID of the published ad to show / review / report"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{user_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "List Published Ads (no filters)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads"]
+        },
+        "description": "Returns a paginated list (10 per page) of all published ads.\nAccessible by guests and authenticated users.\n\nResponse shape:\n{\n  data: [ AdListResource, ... ],\n  meta: { current_page, last_page, per_page, total },\n  links: { first, last, prev, next }\n}\n\nEach card contains:\n  title, advertiser_name, purpose, apartment_condition,\n  price, rental_period, region, city, district,\n  property_area, floor, furnishing_status,\n  cover_image, is_nhc_verified, reviews_count, average_rating"
+      }
+    },
+    {
+      "name": "List Published Ads (with search)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads?search=النرجس",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads"],
+          "query": [
+            {
+              "key": "search",
+              "value": "النرجس",
+              "description": "Full-text search across title, description, advertiser name, region, city, district, property_type, fal/ad license numbers"
+            }
+          ]
+        },
+        "description": "Search example — returns ads matching the keyword in any searchable field.\nWorks like a search engine: partial matches across multiple columns and nhc_data JSON fields."
+      }
+    },
+    {
+      "name": "List Published Ads (filter by purpose = sale)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads?purpose=sale",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads"],
+          "query": [
+            {
+              "key": "purpose",
+              "value": "sale",
+              "description": "sale | rent"
+            }
+          ]
+        },
+        "description": "Quick filter — show only ads for sale."
+      }
+    },
+    {
+      "name": "List Published Ads (filter by purpose = rent)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads?purpose=rent",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads"],
+          "query": [
+            {
+              "key": "purpose",
+              "value": "rent",
+              "description": "sale | rent"
+            }
+          ]
+        },
+        "description": "Quick filter — show only rental ads."
+      }
+    },
+    {
+      "name": "List Published Ads (full filter example)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads?purpose=rent&apartment_condition=new&rental_period=monthly&furnishing_status=furnished&price_min=1000&price_max=5000&region=الرياض&city=الرياض&district=النرجس&property_type=شقة",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads"],
+          "query": [
+            {
+              "key": "purpose",
+              "value": "rent",
+              "description": "sale | rent"
+            },
+            {
+              "key": "apartment_condition",
+              "value": "new",
+              "description": "new | used | under_construction"
+            },
+            {
+              "key": "rental_period",
+              "value": "monthly",
+              "description": "daily | weekly | monthly | yearly — only meaningful when purpose = rent"
+            },
+            {
+              "key": "furnishing_status",
+              "value": "furnished",
+              "description": "furnished | unfurnished"
+            },
+            {
+              "key": "price_min",
+              "value": "1000",
+              "description": "Minimum price (inclusive)"
+            },
+            {
+              "key": "price_max",
+              "value": "5000",
+              "description": "Maximum price (inclusive)"
+            },
+            {
+              "key": "region",
+              "value": "الرياض",
+              "description": "Partial match on nhc_data->region"
+            },
+            {
+              "key": "city",
+              "value": "الرياض",
+              "description": "Partial match on nhc_data->city"
+            },
+            {
+              "key": "district",
+              "value": "النرجس",
+              "description": "Partial match on nhc_data->district"
+            },
+            {
+              "key": "property_type",
+              "value": "شقة",
+              "description": "Exact match on nhc_data->property_type (e.g. شقة, فيلا, أرض, محل)"
+            }
+          ]
+        },
+        "description": "Full filter example combining all available filter params.\nAll params are optional — combine any subset.\n\nFilters applied:\n  purpose            → ads.purpose\n  apartment_condition → ads.apartment_condition\n  rental_period      → ads.rental_period\n  furnishing_status  → ads.furnishing_status\n  price_min/max      → ads.price range\n  region/city/district → nhc_data JSON path (LIKE)\n  property_type      → nhc_data JSON path (exact)"
+      }
+    },
+    {
+      "name": "Show Ad Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads/{{ad_id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads", "{{ad_id}}"]
+        },
+        "description": "Full detail view of a single published ad.\nAccessible by guests and authenticated users.\n\nGuest vs Auth differences:\n  - advertiser_phone  → hidden for guests, shown for auth users\n  - nhc_mobile        → hidden for guests, shown for auth users\n\nResponse includes:\n  advertiser_name, purpose, title, description, apartment_condition,\n  region, city, district, latitude, longitude, location_description_on_moj_deed,\n  property_area, number_of_rooms, living_rooms_count, bathrooms_count,\n  floor, property_face, street_width, furnishing_status,\n  property_type, property_age, property_usages[], property_utilities[],\n  price, rental_period, property_price (NHC unit price),\n  deed_number (sale only), plan_number, land_number,\n  guarantees_and_their_duration, obligations_on_the_property,\n  ownership_transfer_fee_type, responsible_employee_name,\n  responsible_employee_phone_number,\n  fal_license_number, ad_license_number, ad_license_url, is_nhc_verified,\n  nhc_creation_date, nhc_end_date,\n  cover_image, apartment_images[], apartment_video,\n  reviews_count, average_rating, reviews[],\n  nhc_mobile (auth only), advertiser_phone (auth only),\n  created_at\n\nHTTP 404 if ad not found or not published."
+      }
+    },
+    {
+      "name": "Submit Review (auth only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 4,\n  \"feedback\": \"شقة ممتازة وموقع رائع، التواصل مع المعلن كان سهلاً وسريعاً.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads/{{ad_id}}/reviews",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads", "{{ad_id}}", "reviews"]
+        },
+        "description": "Submit a star rating and optional written feedback for a published ad.\nRequires authentication (Bearer {{user_token}}).\n\nRules:\n  - One review per user per ad (422 if already reviewed)\n  - rating: required, integer 1–5\n  - feedback: optional, string max 500 chars\n\nHTTP 201 on success.\nHTTP 422 if already reviewed or validation fails.\nHTTP 404 if ad not found or not published.\nHTTP 401 if not authenticated."
+      }
+    },
+    {
+      "name": "Submit Review – rating only (no feedback)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads/{{ad_id}}/reviews",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads", "{{ad_id}}", "reviews"]
+        },
+        "description": "Minimal review — rating only, feedback is optional.\nRequires authentication."
+      }
+    },
+    {
+      "name": "Submit Report (auth only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"هذا الإعلان يحتوي على معلومات مضللة وغير دقيقة عن موقع العقار وسعره.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/public/ads/{{ad_id}}/reports",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "public", "ads", "{{ad_id}}", "reports"]
+        },
+        "description": "Report a published ad with a written reason.\nRequires authentication (Bearer {{user_token}}).\n\nRules:\n  - One report per user per ad (422 if already reported)\n  - reason: required, string min 10 chars, max 500 chars\n\nHTTP 201 on success.\nHTTP 422 if already reported or validation fails.\nHTTP 404 if ad not found or not published.\nHTTP 401 if not authenticated."
+      }
+    }
+  ]
+}

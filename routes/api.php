@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Client\AboutUsController;
+use App\Http\Controllers\Api\Client\AdController as PublicAdController;
 use App\Http\Controllers\Api\Client\AdPackageController as ClientAdPackageController;
 use App\Http\Controllers\Api\Client\BlogController;
 use App\Http\Controllers\Api\Client\ContactController;
@@ -87,6 +88,22 @@ Route::middleware('auth:api')->prefix('nafath')->name('nafath.')->group(function
 
 // Nafath Webhook Callback (unauthenticated – called by Nafath servers)
 Route::post('nafath/callback', [NafathController::class, 'callback'])->name('nafath.callback');
+
+// ── Public Ads (guests + authenticated users) ─────────────────────────────
+// List and detail are open to everyone.
+// Reviews and reports require authentication.
+Route::prefix('public/ads')->name('public.ads.')->group(function () {
+
+    // Open to all (guests + auth)
+    Route::get('/',      [PublicAdController::class, 'index'])->name('index');
+    Route::get('/{id}',  [PublicAdController::class, 'show'])->name('show');
+
+    // Auth-only actions
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/{id}/reviews', [PublicAdController::class, 'storeReview'])->name('reviews.store');
+        Route::post('/{id}/reports', [PublicAdController::class, 'storeReport'])->name('reports.store');
+    });
+});
 
 // Ads (Authenticated Users)
 Route::middleware('auth:api')->prefix('ads')->name('ads.')->group(function () {
