@@ -38,6 +38,7 @@ class User extends Authenticatable implements HasMedia
         'password',
         'birth_date',
         'identity_number',
+        'verified_by_nafath',
         'status',
         'disabled_reason',
         'country_code',
@@ -62,10 +63,11 @@ class User extends Authenticatable implements HasMedia
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'birth_date' => 'date',
-            'password' => 'hashed',
-            'disabled_at' => 'datetime',
+            'email_verified_at'  => 'datetime',
+            'birth_date'         => 'date',
+            'password'           => 'hashed',
+            'disabled_at'        => 'datetime',
+            'verified_by_nafath' => 'boolean',
         ];
     }
 
@@ -109,6 +111,11 @@ class User extends Authenticatable implements HasMedia
     public function fcmTokens(): HasMany
     {
         return $this->hasMany(FcmToken::class);
+    }
+
+    public function nafathVerificationRequests(): HasMany
+    {
+        return $this->hasMany(NafathVerificationRequest::class);
     }
 
     /******************************* FCM Routing **************/

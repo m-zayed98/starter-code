@@ -7,6 +7,7 @@ use App\Repositories\Contracts\AdPackageRepositoryContract;
 use App\Repositories\Contracts\BlogRepositoryContract;
 use App\Repositories\Contracts\CommentRepositoryContract;
 use App\Repositories\Contracts\FcmTokenRepositoryContract;
+use App\Repositories\Contracts\NafathVerificationRequestRepositoryContract;
 use App\Repositories\Contracts\NotificationGroupRepositoryContract;
 use App\Repositories\Contracts\RoleRepositoryContract;
 use App\Repositories\Contracts\SubscriptionRepositoryContract;
@@ -19,6 +20,7 @@ use App\Repositories\CommentRepository;
 use App\Repositories\ContactMessageRepository;
 use App\Repositories\Contracts\ContactMessageRepositoryContract;
 use App\Repositories\FcmTokenRepository;
+use App\Repositories\NafathVerificationRequestRepository;
 use App\Repositories\NotificationGroupRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\SubscriptionRepository;
@@ -41,5 +43,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SubscriptionRepositoryContract::class, SubscriptionRepository::class);
         $this->app->bind(TransactionRepositoryContract::class, TransactionRepository::class);
         $this->app->bind(FcmTokenRepositoryContract::class, FcmTokenRepository::class);
+        $this->app->bind(NafathVerificationRequestRepositoryContract::class, NafathVerificationRequestRepository::class);
     }
 }

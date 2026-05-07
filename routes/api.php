@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Client\GeneralSettingController;
 use App\Http\Controllers\Api\Client\PrivacyController;
 use App\Http\Controllers\Api\Client\TermsAndCondiotionsController;
 use App\Http\Controllers\Api\User\AuthController as UserAuthController;
+use App\Http\Controllers\Api\User\NafathController;
 use App\Http\Controllers\Api\User\ProfileController as UserProfileController;
 use App\Http\Controllers\Api\User\SubscriptionController;
 use App\Http\Controllers\Api\User\TransactionController;
@@ -77,3 +78,11 @@ Route::middleware('auth:api')->group(function () {
     // Transaction processing (mock payment gateway callback)
     Route::post('transactions/{id}/process', [TransactionController::class, 'process'])->name('transactions.process');
 });
+
+// Nafath Identity Verification
+Route::middleware('auth:api')->prefix('nafath')->name('nafath.')->group(function () {
+    Route::post('verify', [NafathController::class, 'initiate'])->name('initiate');
+});
+
+// Nafath Webhook Callback (unauthenticated – called by Nafath servers)
+Route::post('nafath/callback', [NafathController::class, 'callback'])->name('nafath.callback');

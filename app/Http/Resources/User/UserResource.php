@@ -15,17 +15,18 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'country_code' => $this->country_code,
-            'full_phone' => $this->full_phone,
-            'avatar' => $this->avatar,
-            'birth_date' => $this->birth_date?->format('Y-m-d'),
-            'identity_number' => $this->identity_number,
-            'created_at' => $this->created_at?->format('Y-m-d H:i'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i'),
+            'id'                  => $this->id,
+            'name'                => $this->name,
+            'email'               => $this->email,
+            'phone'               => $this->phone,
+            'country_code'        => $this->country_code,
+            'full_phone'          => $this->full_phone,
+            'avatar'              => $this->avatar,
+            'birth_date'          => $this->birth_date?->format('Y-m-d'),
+            'identity_number'     => $this->identity_number,
+            'verified_by_nafath'  => (bool) $this->verified_by_nafath,
+            'created_at'          => $this->created_at?->format('Y-m-d H:i'),
+            'updated_at'          => $this->updated_at?->format('Y-m-d H:i'),
         ];
     }
 }
