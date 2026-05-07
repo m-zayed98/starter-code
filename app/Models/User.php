@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Ad;
 use App\Traits\HasOtps;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Laravel\Sanctum\HasApiTokens;
@@ -43,6 +44,12 @@ class User extends Authenticatable implements HasMedia
         'disabled_reason',
         'country_code',
         'disabled_at',
+
+        // FAL / Real Estate Authority advertiser profile
+        'fal_license_number',
+        'nhc_mobile',
+        'advertiser_type',
+        'commercial_registration_number',
     ];
 
     /**
@@ -78,6 +85,15 @@ class User extends Authenticatable implements HasMedia
         return $media?->getFullUrl();
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->singleFile();
+
+        $this->addMediaCollection('commercial_registration')
+            ->singleFile();
+    }
+
     protected function hasPermissionViaRole(Permission $permission): bool
     {
         if (is_a($this, Role::class)) {
@@ -111,6 +127,11 @@ class User extends Authenticatable implements HasMedia
     public function fcmTokens(): HasMany
     {
         return $this->hasMany(FcmToken::class);
+    }
+
+    public function ads(): HasMany
+    {
+        return $this->hasMany(Ad::class);
     }
 
     public function nafathVerificationRequests(): HasMany

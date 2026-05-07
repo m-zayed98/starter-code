@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Client\ContactUsController;
 use App\Http\Controllers\Api\Client\GeneralSettingController;
 use App\Http\Controllers\Api\Client\PrivacyController;
 use App\Http\Controllers\Api\Client\TermsAndCondiotionsController;
+use App\Http\Controllers\Api\User\AdController;
 use App\Http\Controllers\Api\User\AuthController as UserAuthController;
 use App\Http\Controllers\Api\User\NafathController;
 use App\Http\Controllers\Api\User\ProfileController as UserProfileController;
@@ -86,3 +87,12 @@ Route::middleware('auth:api')->prefix('nafath')->name('nafath.')->group(function
 
 // Nafath Webhook Callback (unauthenticated – called by Nafath servers)
 Route::post('nafath/callback', [NafathController::class, 'callback'])->name('nafath.callback');
+
+// Ads (Authenticated Users)
+Route::middleware('auth:api')->prefix('ads')->name('ads.')->group(function () {
+    Route::get('/',        [AdController::class, 'index'])->name('index');
+    Route::post('/',       [AdController::class, 'store'])->name('store');
+    Route::get('/{id}',    [AdController::class, 'show'])->name('show');
+    Route::put('/{id}',    [AdController::class, 'update'])->name('update');
+    Route::delete('/{id}', [AdController::class, 'destroy'])->name('destroy');
+});

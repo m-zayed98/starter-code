@@ -1,0 +1,414 @@
+{
+  "info": {
+    "name": "Ads API",
+    "_postman_id": "ads-api-collection",
+    "description": "Ad CRUD endpoints.\n\nBase URL variable: {{url}}\nAll endpoints are under: {{url}}/api/v1/client/ads\n\nAuth: Bearer {{user_token}} — set both variables in the Collection > Variables tab.\n\n──────────────────────────────────────\nFLOW\n──────────────────────────────────────\n1. POST /ads          → Step 1: Initiate (calls NHC, creates DRAFT ad, returns nhc_data)\n2. POST /ads/{id}     → Steps 2-3-4: Update draft with user fields + media → publishes ad\n3. GET  /ads          → List my ads (paginated)\n4. GET  /ads/{id}     → Show single ad\n5. DELETE /ads/{id}   → Delete ad\n\n──────────────────────────────────────\nNHC DATA FIELDS (returned inside nhc_data)\n──────────────────────────────────────\nis_valid, advertiser_id, ad_license_number, advertiser_name,\nphone_number, brokerage_and_marketing_license_number, deed_number,\nproperty_price, property_type, property_age, advertisement_type,\nproperty_face, property_usages[], property_area, street_width,\nnumber_of_rooms, plan_number, land_number,\nguarantees_and_their_duration, obligations_on_the_property,\nownership_transfer_fee_type, location_description_on_moj_deed,\nproperty_utilities[], responsible_employee_name,\nresponsible_employee_phone_number, region, city, district,\nlatitude, longitude, ad_license_url, creation_date, end_date",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost",
+      "type": "string",
+      "description": "Base URL e.g. http://localhost or https://api.yourdomain.com"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string",
+      "description": "Sanctum bearer token for the authenticated user"
+    },
+    {
+      "key": "ad_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID of the ad to show / update / delete"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{user_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "List My Ads",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads"]
+        },
+        "description": "Returns a paginated list of the authenticated user's ads.\n\nResponse shape:\n{\n  data: [ AdResource, ... ],\n  meta: { current_page, last_page, per_page, total },\n  links: { first, last, prev, next }\n}"
+      }
+    },
+    {
+      "name": "Show Ad",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads/{{ad_id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads", "{{ad_id}}"]
+        },
+        "description": "Returns a single ad owned by the authenticated user.\n\n404 if the ad does not exist or belongs to another user."
+      }
+    },
+    {
+      "name": "Step 1 – Initiate Ad (broker / appraiser / property_manager)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "fal_license_number",
+              "value": "123456",
+              "type": "text",
+              "description": "REQUIRED — FAL (Real Estate Authority) license number. Digits only, 6–12 digits. Saved to user profile on first use."
+            },
+            {
+              "key": "nhc_mobile",
+              "value": "0512345678",
+              "type": "text",
+              "description": "REQUIRED — Mobile number registered with the Real Estate Authority. Exactly 10 digits, must start with 05. Saved to user profile on first use."
+            },
+            {
+              "key": "advertiser_type",
+              "value": "broker",
+              "type": "text",
+              "description": "REQUIRED — One of: broker | appraiser | property_manager | investor | developer\n\nFor broker / appraiser / property_manager: no commercial registration needed.\nFor investor / developer: commercial_registration_number and commercial_registration_file become required."
+            },
+            {
+              "key": "ad_license_number",
+              "value": "654321",
+              "type": "text",
+              "description": "REQUIRED — Per-ad advertisement license number. Digits only, 6–12 digits. Must be unique across the entire platform. 422 returned if already used."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads"]
+        },
+        "description": "Step 1 — Initiates ad creation.\n\nWhat happens server-side:\n1. Validates ad_license_number is not already used (422 if duplicate)\n2. Saves fal_license_number, nhc_mobile, advertiser_type to user profile (only if not already set)\n3. Calls NHC API (mock) with ad_license_number → receives property data\n4. Creates ad in DRAFT status with nhc_data JSON column populated\n5. Returns the new ad including full nhc_data\n\nHTTP 201 on success.\nHTTP 422 if ad_license_number already exists."
+      }
+    },
+    {
+      "name": "Step 1 – Initiate Ad (investor / developer — requires commercial registration)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "fal_license_number",
+              "value": "123456",
+              "type": "text",
+              "description": "REQUIRED — FAL license number. Digits only, 6–12 digits."
+            },
+            {
+              "key": "nhc_mobile",
+              "value": "0512345678",
+              "type": "text",
+              "description": "REQUIRED — Mobile registered with Real Estate Authority. 10 digits, starts with 05."
+            },
+            {
+              "key": "advertiser_type",
+              "value": "developer",
+              "type": "text",
+              "description": "REQUIRED — Use developer or investor to trigger commercial registration requirement."
+            },
+            {
+              "key": "commercial_registration_number",
+              "value": "1234567890",
+              "type": "text",
+              "description": "REQUIRED when advertiser_type is developer or investor. Saved to user profile on first use."
+            },
+            {
+              "key": "commercial_registration_file",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "REQUIRED when advertiser_type is developer or investor. Accepted formats: jpg, jpeg, png, pdf. Max size: 5 MB. Stored in user media collection."
+            },
+            {
+              "key": "ad_license_number",
+              "value": "654321",
+              "type": "text",
+              "description": "REQUIRED — Per-ad advertisement license number. Digits only, 6–12 digits. Unique across platform."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads"]
+        },
+        "description": "Step 1 — Same flow as the broker variant but advertiser_type = developer or investor.\n\nAdditionally:\n- commercial_registration_number is saved to user profile\n- commercial_registration_file is uploaded to the user's media collection (single file, replaces previous)\n\nHTTP 201 on success."
+      }
+    },
+    {
+      "name": "Steps 2-3-4 – Update Ad (purpose = sale)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "_method",
+              "value": "PUT",
+              "type": "text",
+              "description": "Laravel method spoofing — required because multipart/form-data cannot be sent as PUT natively."
+            },
+            {
+              "key": "purpose",
+              "value": "sale",
+              "type": "text",
+              "description": "REQUIRED — sale | rent\n\nWhen sale: deed_number is required, rental_period must be omitted.\nWhen rent: rental_period is required, deed_number must be omitted."
+            },
+            {
+              "key": "title",
+              "value": "شقة للبيع في حي النرجس",
+              "type": "text",
+              "description": "REQUIRED — Ad title. String, min 5 chars, max 50 chars."
+            },
+            {
+              "key": "description",
+              "value": "شقة مميزة في موقع استراتيجي بحي النرجس، تتميز بإطلالة رائعة وتشطيبات عالية الجودة",
+              "type": "text",
+              "description": "REQUIRED — Ad description. String, max 500 chars."
+            },
+            {
+              "key": "apartment_condition",
+              "value": "new",
+              "type": "text",
+              "description": "REQUIRED — new | used | under_construction"
+            },
+            {
+              "key": "deed_number",
+              "value": "DEED-123456",
+              "type": "text",
+              "description": "REQUIRED when purpose = sale. Ownership document number."
+            },
+            {
+              "key": "living_rooms_count",
+              "value": "2",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "bathrooms_count",
+              "value": "3",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "floor",
+              "value": "4",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "furnishing_status",
+              "value": "furnished",
+              "type": "text",
+              "description": "REQUIRED — furnished | unfurnished"
+            },
+            {
+              "key": "price",
+              "value": "850000",
+              "type": "text",
+              "description": "REQUIRED — Numeric. Sale price when purpose = sale."
+            },
+            {
+              "key": "cover_image",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "REQUIRED — Main ad image. Formats: jpg, jpeg, png. Max: 5 MB. Replaces previous cover on re-upload."
+            },
+            {
+              "key": "apartment_images[]",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "REQUIRED — Apartment photos. Formats: jpg, jpeg, png. Max 5 MB each. Up to 10 images total. Repeat this key for multiple files."
+            },
+            {
+              "key": "apartment_images[]",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "Optional second apartment image."
+            },
+            {
+              "key": "apartment_video",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "OPTIONAL — Apartment video. Formats: mp4, mov. Max: 50 MB. Replaces previous video on re-upload."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads/{{ad_id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads", "{{ad_id}}"]
+        },
+        "description": "Steps 2, 3 & 4 — Updates the DRAFT ad created in Step 1 with all remaining user-provided fields and media.\n\nSend as POST with _method=PUT (required for multipart file uploads in Laravel).\n\nFor purpose = sale:\n  - deed_number is REQUIRED\n  - do NOT send rental_period\n\nHTTP 200 on success. Returns the full updated AdResource.\nHTTP 404 if ad not found or not owned by authenticated user."
+      }
+    },
+    {
+      "name": "Steps 2-3-4 – Update Ad (purpose = rent)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "_method",
+              "value": "PUT",
+              "type": "text",
+              "description": "Laravel method spoofing — required because multipart/form-data cannot be sent as PUT natively."
+            },
+            {
+              "key": "purpose",
+              "value": "rent",
+              "type": "text",
+              "description": "REQUIRED — sale | rent"
+            },
+            {
+              "key": "title",
+              "value": "شقة للإيجار في حي النرجس",
+              "type": "text",
+              "description": "REQUIRED — Ad title. String, min 5 chars, max 50 chars."
+            },
+            {
+              "key": "description",
+              "value": "شقة مميزة للإيجار في موقع استراتيجي بحي النرجس، تتميز بإطلالة رائعة وتشطيبات عالية الجودة",
+              "type": "text",
+              "description": "REQUIRED — Ad description. String, max 500 chars."
+            },
+            {
+              "key": "apartment_condition",
+              "value": "used",
+              "type": "text",
+              "description": "REQUIRED — new | used | under_construction"
+            },
+            {
+              "key": "living_rooms_count",
+              "value": "1",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "bathrooms_count",
+              "value": "2",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "floor",
+              "value": "2",
+              "type": "text",
+              "description": "REQUIRED — Integer, min 1."
+            },
+            {
+              "key": "furnishing_status",
+              "value": "unfurnished",
+              "type": "text",
+              "description": "REQUIRED — furnished | unfurnished"
+            },
+            {
+              "key": "price",
+              "value": "3500",
+              "type": "text",
+              "description": "REQUIRED — Numeric. Rental price per rental_period."
+            },
+            {
+              "key": "rental_period",
+              "value": "monthly",
+              "type": "text",
+              "description": "REQUIRED when purpose = rent — daily | weekly | monthly | yearly"
+            },
+            {
+              "key": "cover_image",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "REQUIRED — Main ad image. Formats: jpg, jpeg, png. Max: 5 MB."
+            },
+            {
+              "key": "apartment_images[]",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "REQUIRED — Apartment photos. Formats: jpg, jpeg, png. Max 5 MB each. Up to 10 images. Repeat key for multiple files."
+            },
+            {
+              "key": "apartment_images[]",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "Optional second apartment image."
+            },
+            {
+              "key": "apartment_video",
+              "value": "",
+              "type": "file",
+              "src": [],
+              "description": "OPTIONAL — Apartment video. Formats: mp4, mov. Max: 50 MB."
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads/{{ad_id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads", "{{ad_id}}"]
+        },
+        "description": "Steps 2, 3 & 4 — Same as the sale variant but for rental ads.\n\nFor purpose = rent:\n  - rental_period is REQUIRED (daily | weekly | monthly | yearly)\n  - do NOT send deed_number\n\nSend as POST with _method=PUT.\nHTTP 200 on success."
+      }
+    },
+    {
+      "name": "Delete Ad",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{url}}/api/v1/client/ads/{{ad_id}}",
+          "host": ["{{url}}"],
+          "path": ["api", "v1", "client", "ads", "{{ad_id}}"]
+        },
+        "description": "Permanently deletes an ad owned by the authenticated user.\n\nHTTP 200 on success.\nHTTP 404 if ad not found or belongs to another user."
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Repositories\Contracts;
+
+use App\Models\Ad;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+interface AdRepositoryContract extends RepositoryContract
+{
+    /**
+     * Check whether an ad with the given ad_license_number already exists.
+     * Used to prevent duplicate ads before calling NHC.
+     */
+    public function existsByAdLicenseNumber(string $adLicenseNumber): bool;
+
+    /**
+     * Find an ad by its ad_license_number.
+     */
+    public function findByAdLicenseNumber(string $adLicenseNumber): ?Ad;
+
+    /**
+     * Return a paginated list of ads belonging to a specific user.
+     */
+    public function paginateForUser(int $userId, int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * Find a specific ad that belongs to a given user (ownership check).
+     */
+    public function findForUser(int $adId, int $userId): ?Ad;
+}
