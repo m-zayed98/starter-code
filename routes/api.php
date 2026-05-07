@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Client\AboutUsController;
+use App\Http\Controllers\Api\Client\AdPackageController as ClientAdPackageController;
 use App\Http\Controllers\Api\Client\BlogController;
 use App\Http\Controllers\Api\Client\ContactController;
 use App\Http\Controllers\Api\Client\ContactUsController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\Api\Client\PrivacyController;
 use App\Http\Controllers\Api\Client\TermsAndCondiotionsController;
 use App\Http\Controllers\Api\User\AuthController as UserAuthController;
 use App\Http\Controllers\Api\User\ProfileController as UserProfileController;
+use App\Http\Controllers\Api\User\SubscriptionController;
+use App\Http\Controllers\Api\User\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,6 +37,10 @@ Route::post('contact-us', [ContactUsController::class, 'store'])->name('contact-
 Route::get('blogs', [BlogController::class, 'index'])->name('blogs.index');
 Route::get('blogs/{id}', [BlogController::class, 'show'])->name('blogs.show');
 
+// Ad Packages (Public – with optional auth for is_subscribed flag)
+Route::get('packages', [ClientAdPackageController::class, 'index'])->name('packages.index');
+Route::get('packages/{id}', [ClientAdPackageController::class, 'show'])->name('packages.show');
+
 // Blog Comments (Authenticated Users)
 Route::middleware('auth:api')->group(function () {
     Route::post('blogs/{id}/comments', [BlogController::class, 'storeComment'])->name('blogs.comments.store');
@@ -52,10 +59,21 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth:api')->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [UserProfileController::class, 'index'])->name('index');
     Route::put('/', [UserProfileController::class, 'update'])->name('update');
+    Route::delete('/', [UserProfileController::class, 'destroy'])->name('destroy');
     Route::post('change-phone', [UserAuthController::class, 'changePhone'])->name('change-phone');
 });
 
 // Notifications (User)
 Route::middleware('auth:api')->group(function () {
     require __DIR__ . '/notifications.php';
+});
+
+// Subscriptions & Transactions (Authenticated Users)
+Route::middleware('auth:api')->group(function () {
+    // Subscription
+    Route::get('subscriptions/active', [SubscriptionController::class, 'active'])->name('subscriptions.active');
+    Route::post('subscriptions', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+
+    // Transaction processing (mock payment gateway callback)
+    Route::post('transactions/{id}/process', [TransactionController::class, 'process'])->name('transactions.process');
 });

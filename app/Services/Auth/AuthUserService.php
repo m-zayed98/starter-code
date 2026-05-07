@@ -47,7 +47,6 @@ class AuthUserService implements AuthLoginServiceContract
         $otp = $user->latestValidOtp(OtpPurpose::REGISTER->value);
 
         return [
-            'message' => __('Registration successful. Please verify OTP.'),
             'user' => UserResource::make($user),
             'expires_at' => $otp?->expires_at?->toIso8601String(),
             'purpose' => OtpPurpose::REGISTER->value,

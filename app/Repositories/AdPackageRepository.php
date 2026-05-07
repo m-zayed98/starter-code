@@ -39,6 +39,32 @@ class AdPackageRepository extends BaseRepository implements AdPackageRepositoryC
     }
 
     /**
+     * Return a paginated list of packages visible to clients.
+     * Applies the `visible` scope and orders offers first.
+     */
+    public function getVisiblePackages(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model->newQuery()
+            ->visible()
+            ->offerFirst()
+            ->with(['activeSubscriptions'])
+            ->paginate($perPage);
+    }
+
+    /**
+     * Return a paginated list of packages visible to a specific subscriber.
+     * Includes offer packages where the cap is reached but the user is already subscribed.
+     */
+    public function getVisiblePackagesForSubscriber(int $userId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model->newQuery()
+            ->visibleForSubscriber($userId)
+            ->offerFirst()
+            ->with(['activeSubscriptions'])
+            ->paginate($perPage);
+    }
+
+    /**
      * Check whether a package has any active (non-expired, non-cancelled) subscriptions.
      */
     public function hasActiveSubscriptions(int $id): bool

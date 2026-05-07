@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\SubscriptionException;
 use App\Facades\ApiResponse;
 use App\Services\ApiResponse\StatusCode;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -76,6 +77,11 @@ return Application::configure(basePath: dirname(__DIR__))
                     statusCode: StatusCode::FORBIDDEN,
                     httpStatus: 403,
                 )->send();
+            }
+
+            // ── Subscription domain exceptions ────────────────────────────
+            if ($e instanceof SubscriptionException) {
+                return $e->render();
             }
 
             // ── Model not found → 404 ─────────────────────────────────────

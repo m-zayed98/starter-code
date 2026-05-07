@@ -103,6 +103,30 @@ class UserService extends BaseModelService
         return $user;
     }
 
+    /**
+     * Permanently delete the authenticated user's account.
+     * Revokes all tokens, clears sessions, and hard-deletes the record.
+     *
+     * @param int $id
+     * @return void
+     */
+    public function deleteAccount(int $id): void
+    {
+        $user = $this->repository->showOrFail($id);
+
+        DB::transaction(function () use ($user) {
+            if (method_exists($user, 'tokens')) {
+                $user->tokens()->delete();
+            }
+
+            if (Schema::hasTable('sessions') && Schema::hasColumn('sessions', 'user_id')) {
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+            }
+
+            $this->repository->delete($user->id, forceDelete: true);
+        });
+    }
+
     private function hasUpcomingOrOngoingBookings(int $userId): bool
     {
         if (!Schema::hasTable('bookings')) {

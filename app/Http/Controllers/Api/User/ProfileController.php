@@ -43,4 +43,20 @@ class ProfileController extends Controller
             'user' => UserResource::make($updated),
         ], message: __('Profile updated successfully'))->send();
     }
+
+    /**
+     * Permanently delete the authenticated user's account.
+     */
+    public function destroy(): JsonResponse
+    {
+        $user = auth($this->guard)->user();
+
+        if (! $user) {
+            return ApiResponse::respondWithError(__('Unauthenticated.'), httpStatus: 401)->send();
+        }
+
+        $this->userService->deleteAccount($user->id);
+
+        return ApiResponse::respondWithSuccess(message: __('Account deleted successfully'))->send();
+    }
 }

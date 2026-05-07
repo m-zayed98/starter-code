@@ -45,6 +45,13 @@ final class StatusCode
     const PAYMENT_GATEWAY_ERROR = '5001';
     const INSUFFICIENT_FUNDS  = '5002';
 
+    // ── Subscription (6xxx) ───────────────────────────────────────────────
+    const ALREADY_SUBSCRIBED      = '6000';
+    const SUBSCRIPTION_EXPIRED    = '6001';
+    const SUBSCRIPTION_CANCELLED  = '6002';
+    const PACKAGE_NOT_AVAILABLE   = '6003';
+    const SUBSCRIPTION_QUOTA_EXCEEDED = '6004';
+
     // ── Server (9xxx) ────────────────────────────────────────────────────
     const SERVER_ERROR        = '9000';
     const SERVICE_UNAVAILABLE = '9001';

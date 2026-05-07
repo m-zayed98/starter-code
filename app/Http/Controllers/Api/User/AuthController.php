@@ -34,7 +34,7 @@ class AuthController extends BaseAuthController
         $service = app(AuthUserService::class);
         $data = $service->register($data);
 
-        return ApiResponse::respondWithArray($data)->send();
+        return ApiResponse::respondWithArray($data , __('Registration successful. Please verify OTP.'))->send();
     }
 
     public function verifyOtp(Request $request): JsonResponse
