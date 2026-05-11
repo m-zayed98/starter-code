@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Http\Filters\AdFilter;
+use App\Http\Filters\AdminAdFilter;
 use App\Http\Filters\BaseFilters;
 use App\Models\Ad;
 use App\Repositories\Contracts\AdRepositoryContract;
@@ -13,7 +14,7 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
 {
     protected function resolveModel(): Model
     {
-        return new Ad();
+        return new Ad;
     }
 
     protected function resolveFilter(): ?BaseFilters
@@ -93,6 +94,35 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
             ->where('id', $adId)
             ->where('user_id', $userId)
             ->with('media')
+            ->first();
+    }
+
+    /**
+     * Return a paginated list of all ads for the admin panel.
+     * Applies AdminAdFilter, eager-loads user and media.
+     */
+    public function paginateForAdmin(int $perPage = 15): LengthAwarePaginator
+    {
+        $adminFilter = app(AdminAdFilter::class);
+
+        return $this->newQuery()
+            ->with(['user', 'media'])
+            ->tap(fn ($q) => $adminFilter->apply($q))
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    /**
+     * Find a single ad by ID with full relations for the admin detail view.
+     * Eager-loads user, media, reviews (with user), and reports count.
+     */
+    public function findWithFullDetails(int $adId): ?Ad
+    {
+        /** @var Ad|null */
+        return $this->newQuery()
+            ->where('id', $adId)
+            ->with(['user', 'media', 'reviews.user'])
+            ->withCount('reports')
             ->first();
     }
 }

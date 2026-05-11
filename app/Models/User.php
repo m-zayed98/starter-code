@@ -3,13 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\AdvertiserType;
+use App\Traits\HasOtps;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Ad;
-use App\Traits\HasOtps;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -19,13 +20,14 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
     use HasApiTokens;
-    use Notifiable;
-    use InteractsWithMedia;
-    use HasRoles;
+
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
     use HasOtps;
+    use HasRoles;
+    use InteractsWithMedia;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -70,11 +72,12 @@ class User extends Authenticatable implements HasMedia
     protected function casts(): array
     {
         return [
-            'email_verified_at'  => 'datetime',
-            'birth_date'         => 'date',
-            'password'           => 'hashed',
-            'disabled_at'        => 'datetime',
+            'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
+            'password' => 'hashed',
+            'disabled_at' => 'datetime',
             'verified_by_nafath' => 'boolean',
+            'advertiser_type' => AdvertiserType::class,
         ];
     }
 
@@ -101,26 +104,9 @@ class User extends Authenticatable implements HasMedia
         }
 
         return $this->hasRole(
-            $permission->roles->filter(fn($role) => $role->is_active)
+            $permission->roles->filter(fn ($role) => $role->is_active)
         );
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /******************************* Relationships **************/
 
@@ -166,7 +152,7 @@ class User extends Authenticatable implements HasMedia
     public function fullPhone(): Attribute
     {
         return Attribute::get(
-            fn() => $this->country_code . $this->phone,
+            fn () => $this->country_code.$this->phone,
         );
     }
 }

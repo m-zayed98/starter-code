@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
 use App\Support\PermissionGenerator;
 use Illuminate\Database\Seeder;
 
@@ -18,9 +17,33 @@ class PermissionsSeeder extends Seeder
 
     private function generateAdminPermissions(): void
     {
-        $entities = ['Admins', 'Roles', 'Users'];
-        $actions  = ['read', 'create', 'update', 'delete'];
+        $actions = ['read', 'create', 'update', 'delete'];
 
-        PermissionGenerator::generate($entities, $actions, 'admin');
+        // Full CRUD modules
+        $fullCrudEntities = [
+            'Admins',
+            'Roles',
+            'Users',
+            'Ad_packages',
+            'Blogs',
+            'Notification_groups',
+            'Contact_messages',
+        ];
+
+        PermissionGenerator::generate($fullCrudEntities, $actions, 'admin');
+
+        // Ads: read + update (toggle status) only — no create/delete from admin panel
+        PermissionGenerator::generate(['Ads'], ['read', 'update'], 'admin');
+
+        // Settings: read + update only
+        $settingsEntities = [
+            'General_settings',
+            'Contact_settings',
+            'About_us_settings',
+            'Terms_settings',
+            'Privacy_settings',
+        ];
+
+        PermissionGenerator::generate($settingsEntities, ['read', 'update'], 'admin');
     }
 }

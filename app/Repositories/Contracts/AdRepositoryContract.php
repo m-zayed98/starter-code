@@ -37,4 +37,16 @@ interface AdRepositoryContract extends RepositoryContract
      * Find a specific ad that belongs to a given user (ownership check).
      */
     public function findForUser(int $adId, int $userId): ?Ad;
+
+    /**
+     * Return a paginated list of all ads for the admin panel.
+     * Applies AdminAdFilter, eager-loads user and media.
+     */
+    public function paginateForAdmin(int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * Find a single ad by ID with full relations for the admin detail view.
+     * Eager-loads user, media, reviews (with user), and reports count.
+     */
+    public function findWithFullDetails(int $adId): ?Ad;
 }

@@ -1,20 +1,21 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\AdPackageController;
-use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AboutUsSettingController;
+use App\Http\Controllers\Api\Admin\AdController;
+use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\AdPackageController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\BlogController;
 use App\Http\Controllers\Api\Admin\ContactMessageController;
 use App\Http\Controllers\Api\Admin\ContactSettingController;
 use App\Http\Controllers\Api\Admin\GeneralSettingController;
+use App\Http\Controllers\Api\Admin\NotificationGroupController;
 use App\Http\Controllers\Api\Admin\PermissionController;
-use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\PrivacySettingController;
+use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\TermsAndCondiotionsSettingController;
 use App\Http\Controllers\Api\Admin\UserController;
-use App\Http\Controllers\Api\Admin\NotificationGroupController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication
@@ -24,8 +25,6 @@ Route::post('auth/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('auth:admin')
     ->name('admin.auth.reset-password');
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('admin.auth.verify-otp');
-
-
 
 Route::middleware('auth:admin')->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('admin.auth.logout');
@@ -85,6 +84,11 @@ Route::middleware('auth:admin')->group(function () {
     Route::put('comments/{commentId}/toggle-visibility', [BlogController::class, 'toggleCommentVisibility'])->name('comments.toggle-visibility');
     Route::delete('comments/{commentId}', [BlogController::class, 'destroyComment'])->name('comments.destroy');
 
+    // Ad Management
+    Route::get('ads', [AdController::class, 'index'])->name('ads.index');
+    Route::get('ads/{id}', [AdController::class, 'show'])->name('ads.show');
+    Route::put('ads/{id}/toggle-status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
+
     // Notifications (Admin)
-    require __DIR__ . '/notifications.php';
+    require __DIR__.'/notifications.php';
 });
