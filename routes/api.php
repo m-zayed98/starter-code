@@ -68,17 +68,16 @@ Route::middleware('auth:api')->prefix('profile')->name('profile.')->group(functi
 
 // Notifications (User)
 Route::middleware('auth:api')->group(function () {
-    require __DIR__ . '/notifications.php';
+    require __DIR__.'/notifications.php';
 });
 
 // Subscriptions & Transactions (Authenticated Users)
 Route::middleware('auth:api')->group(function () {
-    // Subscription
     Route::get('subscriptions/active', [SubscriptionController::class, 'active'])->name('subscriptions.active');
     Route::post('subscriptions', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
-
-    // Transaction processing (mock payment gateway callback)
     Route::post('transactions/{id}/process', [TransactionController::class, 'process'])->name('transactions.process');
+
+    Route::apiResource('ads', AdController::class);
 });
 
 // Nafath Identity Verification
@@ -89,27 +88,12 @@ Route::middleware('auth:api')->prefix('nafath')->name('nafath.')->group(function
 // Nafath Webhook Callback (unauthenticated – called by Nafath servers)
 Route::post('nafath/callback', [NafathController::class, 'callback'])->name('nafath.callback');
 
-// ── Public Ads (guests + authenticated users) ─────────────────────────────
-// List and detail are open to everyone.
-// Reviews and reports require authentication.
 Route::prefix('public/ads')->name('public.ads.')->group(function () {
+    Route::get('/', [PublicAdController::class, 'index'])->name('index');
+    Route::get('/{id}', [PublicAdController::class, 'show'])->name('show');
 
-    // Open to all (guests + auth)
-    Route::get('/',      [PublicAdController::class, 'index'])->name('index');
-    Route::get('/{id}',  [PublicAdController::class, 'show'])->name('show');
-
-    // Auth-only actions
     Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/reviews', [PublicAdController::class, 'storeReview'])->name('reviews.store');
         Route::post('/{id}/reports', [PublicAdController::class, 'storeReport'])->name('reports.store');
     });
-});
-
-// Ads (Authenticated Users)
-Route::middleware('auth:api')->prefix('ads')->name('ads.')->group(function () {
-    Route::get('/',        [AdController::class, 'index'])->name('index');
-    Route::post('/',       [AdController::class, 'store'])->name('store');
-    Route::get('/{id}',    [AdController::class, 'show'])->name('show');
-    Route::put('/{id}',    [AdController::class, 'update'])->name('update');
-    Route::delete('/{id}', [AdController::class, 'destroy'])->name('destroy');
 });
