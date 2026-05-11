@@ -14,7 +14,17 @@ class AdReport extends Model
         'ad_id',
         'user_id',
         'reason',
+        'reply',
+        'status',
+        'replied_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'replied_at' => 'datetime',
+        ];
+    }
 
     // ─── Relationships ────────────────────────────────────────────────────
 

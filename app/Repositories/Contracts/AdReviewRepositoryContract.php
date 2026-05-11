@@ -3,6 +3,7 @@
 namespace App\Repositories\Contracts;
 
 use App\Models\AdReview;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface AdReviewRepositoryContract extends RepositoryContract
 {
@@ -25,4 +26,10 @@ interface AdReviewRepositoryContract extends RepositoryContract
      * Get the total review count for an ad.
      */
     public function countForAd(int $adId): int;
+
+    /**
+     * Return a paginated list of all reviews for the admin panel.
+     * Applies AdminAdReviewFilter, eager-loads user and ad.
+     */
+    public function paginateForAdmin(int $perPage = 15): LengthAwarePaginator;
 }

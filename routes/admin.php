@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\Admin\AboutUsSettingController;
 use App\Http\Controllers\Api\Admin\AdController;
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AdPackageController;
+use App\Http\Controllers\Api\Admin\AdReportController;
+use App\Http\Controllers\Api\Admin\AdReviewController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\BlogController;
 use App\Http\Controllers\Api\Admin\ContactMessageController;
@@ -88,6 +90,15 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('ads', [AdController::class, 'index'])->name('ads.index');
     Route::get('ads/{id}', [AdController::class, 'show'])->name('ads.show');
     Route::put('ads/{id}/toggle-status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
+
+    // Ad Reports Management
+    Route::get('ad-reports', [AdReportController::class, 'index'])->name('ad-reports.index');
+    Route::get('ad-reports/{id}', [AdReportController::class, 'show'])->name('ad-reports.show');
+    Route::post('ad-reports/{id}/reply', [AdReportController::class, 'reply'])->name('ad-reports.reply');
+
+    // Ad Reviews Management
+    Route::get('ad-reviews', [AdReviewController::class, 'index'])->name('ad-reviews.index');
+    Route::post('ad-reviews/{id}/toggle-visibility', [AdReviewController::class, 'toggleVisibility'])->name('ad-reviews.toggle-visibility');
 
     // Notifications (Admin)
     require __DIR__.'/notifications.php';

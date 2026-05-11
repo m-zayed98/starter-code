@@ -35,6 +35,12 @@ class PermissionsSeeder extends Seeder
         // Ads: read + update (toggle status) only — no create/delete from admin panel
         PermissionGenerator::generate(['Ads'], ['read', 'update'], 'admin');
 
+        // Ad Reports: read + update (reply) only
+        PermissionGenerator::generate(['Ad_reports'], ['read', 'update'], 'admin');
+
+        // Ad Reviews: read + update (toggle visibility) only
+        PermissionGenerator::generate(['Ad_reviews'], ['read', 'update'], 'admin');
+
         // Settings: read + update only
         $settingsEntities = [
             'General_settings',

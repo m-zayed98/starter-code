@@ -15,12 +15,14 @@ class AdReview extends Model
         'user_id',
         'rating',
         'feedback',
+        'is_visible',
     ];
 
     protected function casts(): array
     {
         return [
             'rating' => 'integer',
+            'is_visible' => 'boolean',
         ];
     }
 
