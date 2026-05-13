@@ -25,6 +25,10 @@ class UserResource extends JsonResource
             'birth_date'          => $this->birth_date?->format('Y-m-d'),
             'identity_number'     => $this->identity_number,
             'verified_by_nafath'  => (bool) $this->verified_by_nafath,
+            'fal_license_number'  => $this->fal_license_number,
+            'nhc_mobile'           => $this->nhc_mobile,
+            'advertiser_type'      => $this->advertiser_type,
+            'commercial_registration_number' => $this->commercial_registration_number,
             'created_at'          => $this->created_at?->format('Y-m-d H:i'),
             'updated_at'          => $this->updated_at?->format('Y-m-d H:i'),
         ];

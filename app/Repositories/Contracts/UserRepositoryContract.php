@@ -30,4 +30,9 @@ interface UserRepositoryContract extends RepositoryContract
      * @return Model|null
      */
     public function updateProfile(int $id, array $data): ?Model;
+
+    /**
+     * Count users who have at least one ad (advertisers).
+     */
+    public function countAdvertisers(): int;
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Client\AboutUsController;
+use App\Http\Controllers\Api\Client\AdActionController;
 use App\Http\Controllers\Api\Client\AdController as PublicAdController;
 use App\Http\Controllers\Api\Client\AdPackageController as ClientAdPackageController;
 use App\Http\Controllers\Api\Client\BlogController;
@@ -95,5 +96,6 @@ Route::prefix('public/ads')->name('public.ads.')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/{id}/reviews', [PublicAdController::class, 'storeReview'])->name('reviews.store');
         Route::post('/{id}/reports', [PublicAdController::class, 'storeReport'])->name('reports.store');
+        Route::post('/{id}/action',  [AdActionController::class, 'store'])->name('action.store');
     });
 });

@@ -94,7 +94,7 @@ class AdDetailResource extends JsonResource
             // ── Media ─────────────────────────────────────────────────────
             'cover_image'         => $this->getFirstMediaUrl('cover_image') ?: null,
             'apartment_images'    => $this->getMedia('apartment_images')
-                ->map(fn ($m) => $m->getFullUrl())
+                ->map(fn($m) => $m->getFullUrl())
                 ->values()
                 ->toArray(),
             'apartment_video'     => $this->getFirstMediaUrl('apartment_video') ?: null,
@@ -110,10 +110,15 @@ class AdDetailResource extends JsonResource
                 AdReviewResource::collection($this->reviews),
             ),
 
+            // ── Action counts ─────────────────────────────────────────────
+            'views_count'         => $this->views_count    ?? 0,
+            'calls_count'         => $this->calls_count    ?? 0,
+            'whatsapp_count'      => $this->whatsapp_count ?? 0,
+
             // ── Auth-only contact info ────────────────────────────────────
             'nhc_mobile'          => $this->when(
                 $isAuthenticated,
-                fn () => $this->user?->nhc_mobile,
+                fn() => $this->user?->nhc_mobile,
             ),
 
             'created_at'          => $this->created_at?->format('Y-m-d H:i'),

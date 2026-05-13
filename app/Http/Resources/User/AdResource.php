@@ -61,6 +61,11 @@ class AdResource extends JsonResource
             // ── Timestamps ────────────────────────────────────────────────
             'created_at'          => $this->created_at?->format('Y-m-d H:i'),
             'updated_at'          => $this->updated_at?->format('Y-m-d H:i'),
+
+            // ── Action counts ─────────────────────────────────────────────
+            'views_count'         => $this->views_count    ?? 0,
+            'calls_count'         => $this->calls_count    ?? 0,
+            'whatsapp_count'      => $this->whatsapp_count ?? 0,
         ];
     }
 }

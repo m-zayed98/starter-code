@@ -49,4 +49,14 @@ interface AdRepositoryContract extends RepositoryContract
      * Eager-loads user, media, reviews (with user), and reports count.
      */
     public function findWithFullDetails(int $adId): ?Ad;
+
+    /**
+     * Count published (active) ads.
+     */
+    public function countActive(): int;
+
+    /**
+     * Count non-published (inactive) ads.
+     */
+    public function countInactive(): int;
 }

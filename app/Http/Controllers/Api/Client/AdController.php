@@ -45,11 +45,14 @@ class AdController extends Controller
      * Full detail view of a single published ad.
      * Accessible by guests and authenticated users.
      * Sensitive contact fields (nhc_mobile, advertiser_phone) are hidden for guests.
+     * Records a view action for authenticated users (deduplicated per user per ad).
      */
     public function show(int $id): JsonResponse
     {
+        /** @var \App\Models\User|null $user */
+        $user = auth('api')->user();
         try {
-            $ad = $this->publicAdService->showPublishedAd($id);
+            $ad = $this->publicAdService->showPublishedAd($id, $user?->id);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return ApiResponse::respondWithError(
                 __('الإعلان غير موجود.'),
@@ -73,9 +76,9 @@ class AdController extends Controller
 
         try {
             $review = $this->publicAdService->submitReview(
-                adId:     $id,
-                userId:   $user->id,
-                rating:   $request->validated('rating'),
+                adId: $id,
+                userId: $user->id,
+                rating: $request->validated('rating'),
                 feedback: $request->validated('feedback'),
             );
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
@@ -110,7 +113,7 @@ class AdController extends Controller
 
         try {
             $report = $this->publicAdService->submitReport(
-                adId:   $id,
+                adId: $id,
                 userId: $user->id,
                 reason: $request->validated('reason'),
             );

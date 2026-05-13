@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Admin\PermissionController;
 use App\Http\Controllers\Api\Admin\PrivacySettingController;
 use App\Http\Controllers\Api\Admin\ProfileController;
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\StatController;
 use App\Http\Controllers\Api\Admin\TermsAndCondiotionsSettingController;
 use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -101,5 +102,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('ad-reviews/{id}/toggle-visibility', [AdReviewController::class, 'toggleVisibility'])->name('ad-reviews.toggle-visibility');
 
     // Notifications (Admin)
-    require __DIR__.'/notifications.php';
+
+    // Dashboard Statistics
+    Route::get('statistics', [StatController::class, 'index'])->name('stats.index');
+    require __DIR__ . '/notifications.php';
 });

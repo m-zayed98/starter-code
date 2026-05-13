@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Repositories\Contracts\AdminRepositoryContract;
+use App\Repositories\Contracts\AdActionRepositoryContract;
 use App\Repositories\Contracts\AdPackageRepositoryContract;
 use App\Repositories\Contracts\AdRepositoryContract;
 use App\Repositories\Contracts\AdReportRepositoryContract;
@@ -17,6 +18,7 @@ use App\Repositories\Contracts\SubscriptionRepositoryContract;
 use App\Repositories\Contracts\TransactionRepositoryContract;
 use App\Repositories\Contracts\UserRepositoryContract;
 use App\Repositories\AdminRepository;
+use App\Repositories\AdActionRepository;
 use App\Repositories\AdPackageRepository;
 use App\Repositories\AdRepository;
 use App\Repositories\AdReportRepository;
@@ -44,6 +46,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ContactMessageRepositoryContract::class, ContactMessageRepository::class);
         $this->app->bind(AdPackageRepositoryContract::class, AdPackageRepository::class);
         $this->app->bind(AdRepositoryContract::class, AdRepository::class);
+        $this->app->bind(AdActionRepositoryContract::class, AdActionRepository::class);
         $this->app->bind(AdReviewRepositoryContract::class, AdReviewRepository::class);
         $this->app->bind(AdReportRepositoryContract::class, AdReportRepository::class);
         $this->app->bind(NotificationGroupRepositoryContract::class, NotificationGroupRepository::class);

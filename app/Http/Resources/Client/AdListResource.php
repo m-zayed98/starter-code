@@ -54,6 +54,11 @@ class AdListResource extends JsonResource
             'reviews_count'     => $this->reviews_count ?? 0,
             'average_rating'    => $this->average_rating ?? null,
 
+            // ── Action counts ─────────────────────────────────────────────
+            'views_count'       => $this->views_count    ?? 0,
+            'calls_count'       => $this->calls_count    ?? 0,
+            'whatsapp_count'    => $this->whatsapp_count ?? 0,
+
             'created_at'        => $this->created_at?->format('Y-m-d H:i'),
         ];
     }

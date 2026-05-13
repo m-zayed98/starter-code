@@ -97,6 +97,11 @@ class Ad extends Model implements HasMedia
         return $this->hasMany(AdReport::class);
     }
 
+    public function actions(): HasMany
+    {
+        return $this->hasMany(AdAction::class);
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────
 
     /**

@@ -59,4 +59,14 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
     {
         return $this->update($id, $data);
     }
+
+    /**
+     * Count users who have at least one ad (advertisers).
+     */
+    public function countAdvertisers(): int
+    {
+        return $this->newQuery()
+            ->whereHas('ads')
+            ->count();
+    }
 }

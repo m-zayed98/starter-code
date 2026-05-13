@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\AdActionType;
 use App\Models\Ad;
 use App\Models\AdReport;
 use App\Models\AdReview;
+use App\Repositories\Contracts\AdActionRepositoryContract;
 use App\Repositories\Contracts\AdRepositoryContract;
 use App\Repositories\Contracts\AdReportRepositoryContract;
 use App\Repositories\Contracts\AdReviewRepositoryContract;
@@ -13,7 +15,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 /**
  * Handles all public-facing ad operations:
  *  - Listing published ads (with filters)
- *  - Showing ad detail
+ *  - Showing ad detail (records a view for authenticated users)
  *  - Submitting a review (once per user per ad)
  *  - Submitting a report (once per user per ad)
  */
@@ -23,6 +25,7 @@ class PublicAdService
         private readonly AdRepositoryContract       $adRepository,
         private readonly AdReviewRepositoryContract $reviewRepository,
         private readonly AdReportRepositoryContract $reportRepository,
+        private readonly AdActionRepositoryContract $adActionRepository,
     ) {}
 
     // ─── Listing & Detail ─────────────────────────────────────────────────
@@ -38,10 +41,14 @@ class PublicAdService
 
     /**
      * Return a single published ad with full detail relations.
+     * Records a view action for authenticated users (deduplicated per user per ad).
+     *
+     * @param int      $adId
+     * @param int|null $userId  Pass the authenticated user's ID to record a view, or null for guests.
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function showPublishedAd(int $adId): Ad
+    public function showPublishedAd(int $adId, ?int $userId = null): Ad
     {
         $ad = $this->adRepository->findPublishedWithDetails($adId);
 
@@ -49,6 +56,11 @@ class PublicAdService
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
                 "Published ad #{$adId} not found."
             );
+        }
+
+        // Record view for authenticated users only (deduplicated)
+        if ($userId !== null) {
+            $this->adActionRepository->recordAction($adId, $userId, AdActionType::VIEW);
         }
 
         return $ad;

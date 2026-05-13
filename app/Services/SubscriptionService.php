@@ -44,7 +44,7 @@ class SubscriptionService
             'transactionable_type' => AdPackage::class,
             'transactionable_id'   => $package->id,
             'amount'               => $package->price,
-            'status'               => TransactionStatus::PENDING->value,
+            'status'               => TransactionStatus::COMPLETED->value,
             'reference'            => Str::uuid()->toString(),
         ])->load(['transactionable']);
     }
