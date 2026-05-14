@@ -10,24 +10,28 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Full detail view — used in the public show endpoint.
  * Renders all fields per the US detail page spec.
- * Sensitive contact fields (nhc_mobile) are hidden for guests.
  */
 class AdDetailResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $nhc            = $this->nhc_data ?? [];
-        $isAuthenticated = auth('api')->check();
+        $nhc = $this->nhc_data ?? [];
 
         return [
             'id'                  => $this->id,
 
             // ── Advertiser ────────────────────────────────────────────────
+            'advertiser'          => [
+                'id'       => $this->user?->id,
+                'name'     => $this->user?->name,
+                'phone'    => $this->user?->full_phone,
+                'whatsapp' => $this->user?->full_phone,
+                'image'    => $this->user?->avatar,
+            ],
+
+            // ── Deprecated flat fields (kept for backwards compatibility) ─
             'advertiser_name'     => $nhc['advertiser_name'] ?? null,
-            'advertiser_phone'    => $this->when(
-                $isAuthenticated,
-                $nhc['phone_number'] ?? null,
-            ),
+            'advertiser_phone'    => $nhc['phone_number'] ?? null,
 
             // ── Ad meta ───────────────────────────────────────────────────
             'purpose'             => $this->purpose?->value,
@@ -66,7 +70,7 @@ class AdDetailResource extends JsonResource
             'price'               => $this->price,
             'rental_period'       => $this->rental_period?->value,
             'rental_period_label' => $this->rental_period?->label(),
-            'property_price'      => $nhc['property_price'] ?? null,  // NHC unit price
+            'property_price'      => $nhc['property_price'] ?? null,
 
             // ── Legal / obligations ───────────────────────────────────────
             'deed_number'         => $this->when(
@@ -90,6 +94,7 @@ class AdDetailResource extends JsonResource
             'is_nhc_verified'     => (bool) ($nhc['is_valid'] ?? false),
             'nhc_creation_date'   => $nhc['creation_date'] ?? null,
             'nhc_end_date'        => $nhc['end_date']       ?? null,
+            'nhc_mobile'          => $this->user?->nhc_mobile,
 
             // ── Media ─────────────────────────────────────────────────────
             'cover_image'         => $this->getFirstMediaUrl('cover_image') ?: null,
@@ -115,11 +120,9 @@ class AdDetailResource extends JsonResource
             'calls_count'         => $this->calls_count    ?? 0,
             'whatsapp_count'      => $this->whatsapp_count ?? 0,
 
-            // ── Auth-only contact info ────────────────────────────────────
-            'nhc_mobile'          => $this->when(
-                $isAuthenticated,
-                fn() => $this->user?->nhc_mobile,
-            ),
+            // ── Auth user interaction flags ───────────────────────────────
+            'has_review'          => (bool) ($this->has_review ?? 0),
+            'has_report'          => (bool) ($this->has_report ?? 0),
 
             'created_at'          => $this->created_at?->format('Y-m-d H:i'),
         ];

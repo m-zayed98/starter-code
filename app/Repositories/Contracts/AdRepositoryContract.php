@@ -25,8 +25,9 @@ interface AdRepositoryContract extends RepositoryContract
 
     /**
      * Find a single published ad by ID with full relations for detail view.
+     * When $userId is provided, also appends has_review and has_report counts scoped to that user.
      */
-    public function findPublishedWithDetails(int $adId): ?Ad;
+    public function findPublishedWithDetails(int $adId, ?int $userId = null): ?Ad;
 
     /**
      * Return a paginated list of ads belonging to a specific user.
@@ -49,6 +50,12 @@ interface AdRepositoryContract extends RepositoryContract
      * Eager-loads user, media, reviews (with user), and reports count.
      */
     public function findWithFullDetails(int $adId): ?Ad;
+
+    /**
+     * Return a paginated list of published ads with minimal fields for map usage.
+     * Applies AdFilter, eager-loads only cover_image media.
+     */
+    public function paginatePublishedForMap(int $perPage = 50): LengthAwarePaginator;
 
     /**
      * Count published (active) ads.

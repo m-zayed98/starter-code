@@ -28,6 +28,15 @@ class PublicAdService
         private readonly AdActionRepositoryContract $adActionRepository,
     ) {}
 
+    /**
+     * Return a paginated list of published ads with minimal fields for map usage.
+     * Filters are applied automatically via AdFilter (same as the public listing).
+     */
+    public function listPublishedAdsForMap(int $perPage = 50): LengthAwarePaginator
+    {
+        return $this->adRepository->paginatePublishedForMap($perPage);
+    }
+
     // ─── Listing & Detail ─────────────────────────────────────────────────
 
     /**
@@ -42,6 +51,7 @@ class PublicAdService
     /**
      * Return a single published ad with full detail relations.
      * Records a view action for authenticated users (deduplicated per user per ad).
+     * When a userId is provided, appends has_review and has_report flags to the model.
      *
      * @param int      $adId
      * @param int|null $userId  Pass the authenticated user's ID to record a view, or null for guests.
@@ -50,7 +60,7 @@ class PublicAdService
      */
     public function showPublishedAd(int $adId, ?int $userId = null): Ad
     {
-        $ad = $this->adRepository->findPublishedWithDetails($adId);
+        $ad = $this->adRepository->findPublishedWithDetails($adId, $userId);
 
         if ($ad === null) {
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException(

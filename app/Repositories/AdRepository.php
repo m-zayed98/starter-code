@@ -63,8 +63,9 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
     /**
      * Find a single published ad by ID with full relations for detail view.
      * Eager-loads user, media, reviews (with user), reports count, and action counts.
+     * When $userId is provided, also appends has_review and has_report counts scoped to that user.
      */
-    public function findPublishedWithDetails(int $adId): ?Ad
+    public function findPublishedWithDetails(int $adId, ?int $userId = null): ?Ad
     {
         /** @var Ad|null */
         return $this->newQuery()
@@ -76,13 +77,17 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                 'actions as views_count'    => fn($q) => $q->where('type', 'view'),
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
+                ...($userId !== null ? [
+                    'reviews as has_review' => fn($q) => $q->where('user_id', $userId),
+                    'reports as has_report' => fn($q) => $q->where('user_id', $userId),
+                ] : []),
             ])
             ->first();
     }
 
     /**
      * Return a paginated list of ads belonging to a specific user.
-     * Eager-loads media and per-ad action counts.
+     * Applies AdFilter (same filters as the public listing), eager-loads media and per-ad action counts.
      */
     public function paginateForUser(int $userId, int $perPage = 15): LengthAwarePaginator
     {
@@ -94,6 +99,7 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
             ])
+            ->tap(fn($q) => $this->applyFilters($q))
             ->latest()
             ->paginate($perPage);
     }
@@ -144,6 +150,20 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
             ->with(['user', 'media', 'reviews.user'])
             ->withCount('reports')
             ->first();
+    }
+
+    /**
+     * Return a paginated list of published ads with minimal fields for map usage.
+     * Applies AdFilter, eager-loads only cover_image media.
+     */
+    public function paginatePublishedForMap(int $perPage = 50): LengthAwarePaginator
+    {
+        return $this->newQuery()
+            ->where('status', 'published')
+            ->with('media')
+            ->tap(fn($q) => $this->applyFilters($q))
+            ->latest()
+            ->paginate($perPage);
     }
 
     /**

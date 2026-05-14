@@ -69,7 +69,7 @@ Route::middleware('auth:api')->prefix('profile')->name('profile.')->group(functi
 
 // Notifications (User)
 Route::middleware('auth:api')->group(function () {
-    require __DIR__.'/notifications.php';
+    require __DIR__ . '/notifications.php';
 });
 
 // Subscriptions & Transactions (Authenticated Users)
@@ -91,6 +91,7 @@ Route::post('nafath/callback', [NafathController::class, 'callback'])->name('naf
 
 Route::prefix('public/ads')->name('public.ads.')->group(function () {
     Route::get('/', [PublicAdController::class, 'index'])->name('index');
+    Route::get('/map', [PublicAdController::class, 'map'])->name('map');
     Route::get('/{id}', [PublicAdController::class, 'show'])->name('show');
 
     Route::middleware('auth:api')->group(function () {

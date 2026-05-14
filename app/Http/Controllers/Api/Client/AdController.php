@@ -8,6 +8,7 @@ use App\Http\Requests\Client\StoreAdReportRequest;
 use App\Http\Requests\Client\StoreAdReviewRequest;
 use App\Http\Resources\Client\AdDetailResource;
 use App\Http\Resources\Client\AdListResource;
+use App\Http\Resources\Client\AdMapResource;
 use App\Http\Resources\Client\AdReportResource;
 use App\Http\Resources\Client\AdReviewResource;
 use App\Services\PublicAdService;
@@ -18,6 +19,23 @@ class AdController extends Controller
     public function __construct(
         private readonly PublicAdService $publicAdService,
     ) {}
+
+    /**
+     * GET /public/ads/map
+     *
+     * Minimized listing of published ads for map pin rendering.
+     * Returns only id, title, cover_image, price, latitude, longitude.
+     * Accessible by guests and authenticated users.
+     * Supports the same query filters as the public listing.
+     */
+    public function map(): JsonResponse
+    {
+        $ads = $this->publicAdService->listPublishedAdsForMap(perPage: 200);
+
+        return ApiResponse::respondWithCollection(AdMapResource::collection($ads))
+            ->withPagination($ads)
+            ->send();
+    }
 
     /**
      * GET /public/ads
