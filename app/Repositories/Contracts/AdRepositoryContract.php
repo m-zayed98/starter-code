@@ -66,4 +66,19 @@ interface AdRepositoryContract extends RepositoryContract
      * Count non-published (inactive) ads.
      */
     public function countInactive(): int;
+
+    /**
+     * Count published ads for a specific user.
+     */
+    public function countPublishedForUser(int $userId): int;
+
+    /**
+     * Count unpublished (non-published) ads for a specific user.
+     */
+    public function countUnpublishedForUser(int $userId): int;
+
+    /**
+     * Sum total views across all ads for a specific user.
+     */
+    public function sumViewsForUser(int $userId): int;
 }

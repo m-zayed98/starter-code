@@ -51,13 +51,13 @@ class AdListResource extends JsonResource
             'is_nhc_verified'   => (bool) ($nhc['is_valid'] ?? false),
 
             // ── Rating summary ────────────────────────────────────────────
-            'reviews_count'     => $this->reviews_count ?? 0,
-            'average_rating'    => $this->average_rating ?? null,
+            'reviews_count'     => $this->reviews_count,
+            'average_rating'    => $this->average_rating,
 
             // ── Action counts ─────────────────────────────────────────────
-            'views_count'       => $this->views_count    ?? 0,
-            'calls_count'       => $this->calls_count    ?? 0,
-            'whatsapp_count'    => $this->whatsapp_count ?? 0,
+            'views_count'       => $this->views_count,
+            'calls_count'       => $this->calls_count,
+            'whatsapp_count'    => $this->whatsapp_count,
 
             'created_at'        => $this->created_at?->format('Y-m-d H:i'),
         ];

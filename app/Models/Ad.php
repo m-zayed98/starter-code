@@ -119,4 +119,78 @@ class Ad extends Model implements HasMedia
     {
         return $this->status === AdStatus::DRAFT;
     }
+
+    // ─── Mutators / Computed Attributes ──────────────────────────────────
+
+    /**
+     * Whether the ad is currently published.
+     * Reads from withCount('actions as views_count') if available,
+     * otherwise falls back to the status enum.
+     */
+    public function getIsPublishedAttribute(): bool
+    {
+        return $this->status === AdStatus::PUBLISHED;
+    }
+
+    /**
+     * Average rating — prefers the eager-loaded aggregate (average_rating from withAvg)
+     * or the withCount result; falls back to computing from the loaded reviews relation.
+     * Never runs a query inside the resource.
+     */
+    public function getAverageRatingAttribute(): ?float
+    {
+        // Set by withAvg('reviews', 'rating') or manually assigned
+        if (array_key_exists('average_rating', $this->attributes)) {
+            $val = $this->attributes['average_rating'];
+            return $val !== null ? round((float) $val, 1) : null;
+        }
+
+        // Fall back to loaded reviews relation (no extra query)
+        if ($this->relationLoaded('reviews') && $this->reviews->isNotEmpty()) {
+            return round($this->reviews->avg('rating'), 1);
+        }
+
+        return null;
+    }
+
+    /**
+     * Reviews count — prefers the eager-loaded aggregate (reviews_count from withCount).
+     * Falls back to the loaded reviews relation count.
+     */
+    public function getReviewsCountAttribute(): int
+    {
+        if (array_key_exists('reviews_count', $this->attributes)) {
+            return (int) $this->attributes['reviews_count'];
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return $this->reviews->count();
+        }
+
+        return 0;
+    }
+
+    /**
+     * Views count — prefers the eager-loaded aggregate (views_count from withCount).
+     */
+    public function getViewsCountAttribute(): int
+    {
+        return (int) ($this->attributes['views_count'] ?? 0);
+    }
+
+    /**
+     * Calls count — prefers the eager-loaded aggregate (calls_count from withCount).
+     */
+    public function getCallsCountAttribute(): int
+    {
+        return (int) ($this->attributes['calls_count'] ?? 0);
+    }
+
+    /**
+     * WhatsApp count — prefers the eager-loaded aggregate (whatsapp_count from withCount).
+     */
+    public function getWhatsappCountAttribute(): int
+    {
+        return (int) ($this->attributes['whatsapp_count'] ?? 0);
+    }
 }

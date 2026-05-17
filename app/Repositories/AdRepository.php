@@ -43,7 +43,7 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
 
     /**
      * Return a paginated list of published ads for the public listing.
-     * Applies AdFilter, eager-loads media and per-ad action counts.
+     * Applies AdFilter, eager-loads media and per-ad action counts + review aggregates.
      */
     public function paginatePublished(int $perPage = 10): LengthAwarePaginator
     {
@@ -54,7 +54,9 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                 'actions as views_count'    => fn($q) => $q->where('type', 'view'),
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
+                'reviews as reviews_count',
             ])
+            ->withAvg('reviews as average_rating', 'rating')
             ->tap(fn($q) => $this->applyFilters($q))
             ->latest()
             ->paginate($perPage);
@@ -74,6 +76,7 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
             ->with(['user', 'media', 'reviews.user'])
             ->withCount([
                 'reports',
+                'reviews as reviews_count',
                 'actions as views_count'    => fn($q) => $q->where('type', 'view'),
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
@@ -82,12 +85,13 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                     'reports as has_report' => fn($q) => $q->where('user_id', $userId),
                 ] : []),
             ])
+            ->withAvg('reviews as average_rating', 'rating')
             ->first();
     }
 
     /**
      * Return a paginated list of ads belonging to a specific user.
-     * Applies AdFilter (same filters as the public listing), eager-loads media and per-ad action counts.
+     * Applies AdFilter (same filters as the public listing), eager-loads media and per-ad action counts + review aggregates.
      */
     public function paginateForUser(int $userId, int $perPage = 15): LengthAwarePaginator
     {
@@ -98,7 +102,9 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                 'actions as views_count'    => fn($q) => $q->where('type', 'view'),
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
+                'reviews as reviews_count',
             ])
+            ->withAvg('reviews as average_rating', 'rating')
             ->tap(fn($q) => $this->applyFilters($q))
             ->latest()
             ->paginate($perPage);
@@ -106,7 +112,7 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
 
     /**
      * Find a specific ad that belongs to a given user (ownership check).
-     * Eager-loads media and per-ad action counts.
+     * Eager-loads media and per-ad action counts + review aggregates.
      */
     public function findForUser(int $adId, int $userId): ?Ad
     {
@@ -119,7 +125,9 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
                 'actions as views_count'    => fn($q) => $q->where('type', 'view'),
                 'actions as calls_count'    => fn($q) => $q->where('type', 'call'),
                 'actions as whatsapp_count' => fn($q) => $q->where('type', 'whatsapp'),
+                'reviews as reviews_count',
             ])
+            ->withAvg('reviews as average_rating', 'rating')
             ->first();
     }
 
@@ -184,5 +192,39 @@ class AdRepository extends BaseRepository implements AdRepositoryContract
         return $this->newQuery()
             ->where('status', '!=', 'published')
             ->count();
+    }
+
+    /**
+     * Count published ads for a specific user.
+     */
+    public function countPublishedForUser(int $userId): int
+    {
+        return $this->newQuery()
+            ->where('user_id', $userId)
+            ->where('status', 'published')
+            ->count();
+    }
+
+    /**
+     * Count unpublished (non-published) ads for a specific user.
+     */
+    public function countUnpublishedForUser(int $userId): int
+    {
+        return $this->newQuery()
+            ->where('user_id', $userId)
+            ->where('status', '!=', 'published')
+            ->count();
+    }
+
+    /**
+     * Sum total views across all ads for a specific user.
+     */
+    public function sumViewsForUser(int $userId): int
+    {
+        return (int) $this->newQuery()
+            ->where('ads.user_id', $userId)
+            ->join('ad_actions', 'ads.id', '=', 'ad_actions.ad_id')
+            ->where('ad_actions.type', 'view')
+            ->count('ad_actions.id');
     }
 }

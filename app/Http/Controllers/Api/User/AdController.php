@@ -138,4 +138,56 @@ class AdController extends Controller
             message: __('تم حذف الإعلان بنجاح.'),
         )->send();
     }
+
+    /**
+     * PUT /ads/{id}/toggle-status
+     *
+     * Toggle the ad between published (active) and rejected (unpublished).
+     * - published  → rejected  (hidden from public listing)
+     * - any other  → published (visible in public listing)
+     *
+     * Only fully completed ads (not drafts) can be toggled.
+     */
+    public function toggleStatus(int $id): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = auth('api')->user();
+
+        try {
+            $ad = $this->adService->toggleStatus($id, $user->id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return ApiResponse::respondWithError(
+                __('الإعلان غير موجود.'),
+                httpStatus: 404,
+            )->send();
+        } catch (\DomainException $e) {
+            return ApiResponse::respondWithError(
+                $e->getMessage(),
+                httpStatus: 422,
+            )->send();
+        }
+
+        return ApiResponse::respondWithModel(
+            new AdResource($ad),
+            message: __('تم تحديث حالة الإعلان بنجاح.'),
+        )->send();
+    }
+
+    /**
+     * GET /ads/stats
+     *
+     * Return statistics for the authenticated user's ads:
+     *  - published_ads_count   : number of published ads
+     *  - unpublished_ads_count : number of non-published ads (draft / rejected / expired)
+     *  - total_views           : total view actions across all user's ads
+     */
+    public function stats(): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = auth('api')->user();
+
+        $stats = $this->adService->getUserAdStats($user->id);
+
+        return ApiResponse::respondWithArray($stats)->send();
+    }
 }

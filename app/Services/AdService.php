@@ -191,6 +191,56 @@ class AdService
         $this->adRepository->delete($ad->id);
     }
 
+    /**
+     * Toggle an ad owned by the given user between published and unpublished (rejected).
+     *
+     * - published  → rejected  (hidden from public listing)
+     * - any other  → published (visible in public listing)
+     *
+     * Only ads that have been fully completed (not draft) can be toggled.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws \DomainException  When the ad is still a draft.
+     */
+    public function toggleStatus(int $adId, int $userId): Ad
+    {
+        $ad = $this->adRepository->findForUser($adId, $userId);
+
+        if ($ad === null) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+                "Ad #{$adId} not found for user #{$userId}."
+            );
+        }
+
+        if ($ad->status === AdStatus::DRAFT) {
+            throw new \DomainException(
+                __('لا يمكن تغيير حالة إعلان لم يكتمل بعد.')
+            );
+        }
+
+        $newStatus = $ad->status === AdStatus::PUBLISHED
+            ? AdStatus::REJECTED
+            : AdStatus::PUBLISHED;
+
+        $this->adRepository->update($adId, ['status' => $newStatus->value]);
+
+        return $this->adRepository->findForUser($adId, $userId);
+    }
+
+    /**
+     * Return statistics for the authenticated user's ads.
+     *
+     * @return array{published_ads_count: int, unpublished_ads_count: int, total_views: int}
+     */
+    public function getUserAdStats(int $userId): array
+    {
+        return [
+            'published_ads_count'   => $this->adRepository->countPublishedForUser($userId),
+            'unpublished_ads_count' => $this->adRepository->countUnpublishedForUser($userId),
+            'total_views'           => $this->adRepository->sumViewsForUser($userId),
+        ];
+    }
+
     // ─── Private Helpers ──────────────────────────────────────────────────
 
     /**

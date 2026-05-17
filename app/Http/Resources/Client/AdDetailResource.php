@@ -105,20 +105,17 @@ class AdDetailResource extends JsonResource
             'apartment_video'     => $this->getFirstMediaUrl('apartment_video') ?: null,
 
             // ── Reviews summary ───────────────────────────────────────────
-            'reviews_count'       => $this->reviews_count ?? $this->reviews->count(),
-            'average_rating'      => $this->average_rating
-                ?? ($this->reviews->count()
-                    ? round($this->reviews->avg('rating'), 1)
-                    : null),
+            'reviews_count'       => $this->reviews_count,
+            'average_rating'      => $this->average_rating,
             'reviews'             => $this->whenLoaded(
                 'reviews',
                 AdReviewResource::collection($this->reviews),
             ),
 
             // ── Action counts ─────────────────────────────────────────────
-            'views_count'         => $this->views_count    ?? 0,
-            'calls_count'         => $this->calls_count    ?? 0,
-            'whatsapp_count'      => $this->whatsapp_count ?? 0,
+            'views_count'         => $this->views_count,
+            'calls_count'         => $this->calls_count,
+            'whatsapp_count'      => $this->whatsapp_count,
 
             // ── Auth user interaction flags ───────────────────────────────
             'has_review'          => (bool) ($this->has_review ?? 0),

@@ -78,6 +78,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('subscriptions', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
     Route::post('transactions/{id}/process', [TransactionController::class, 'process'])->name('transactions.process');
 
+    Route::get('ads/stats', [AdController::class, 'stats'])->name('ads.stats');
+    Route::put('ads/{id}/toggle-status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
     Route::apiResource('ads', AdController::class);
 });
 

@@ -20,6 +20,7 @@ class AdResource extends JsonResource
             // ── Status & purpose ──────────────────────────────────────────
             'status'              => $this->status?->value,
             'status_label'        => $this->status?->label(),
+            'is_published'        => $this->is_published,
             'purpose'             => $this->purpose?->value,
             'purpose_label'       => $this->purpose?->label(),
 
@@ -63,9 +64,13 @@ class AdResource extends JsonResource
             'updated_at'          => $this->updated_at?->format('Y-m-d H:i'),
 
             // ── Action counts ─────────────────────────────────────────────
-            'views_count'         => $this->views_count    ?? 0,
-            'calls_count'         => $this->calls_count    ?? 0,
-            'whatsapp_count'      => $this->whatsapp_count ?? 0,
+            'views_count'         => $this->views_count,
+            'calls_count'         => $this->calls_count,
+            'whatsapp_count'      => $this->whatsapp_count,
+
+            // ── Rating summary ────────────────────────────────────────────
+            'reviews_count'       => $this->reviews_count,
+            'average_rating'      => $this->average_rating,
         ];
     }
 }
