@@ -13,7 +13,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'avatar' => $this->avatar,
-            'phone' => $this->phone,
+            'phone' => $this->full_phone,
             'email' => $this->email,
             'identity_number' => $this->identity_number,
             'birth_date' => $this->birth_date?->format('Y-m-d'),
@@ -25,4 +25,3 @@ class UserResource extends JsonResource
         ];
     }
 }
-
