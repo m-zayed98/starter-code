@@ -27,10 +27,12 @@ class UniqueTranslation implements ValidationRule
         }
 
         if ($query->exists()) {
-            $translatedAttribute = __('validation.attributes.'.$attribute, [], app()->getLocale());
+            // Laravel treats dots as array notation in __(), replace with underscore
+            $key = str_replace('.', '_', $attribute);
+            $translatedAttribute = __('validation.attributes.'.$key);
 
-            // Fall back to the raw attribute name if no translation is defined
-            if ($translatedAttribute === 'validation.attributes.'.$attribute) {
+            // Fall back to raw attribute name if no translation found
+            if ($translatedAttribute === 'validation.attributes.'.$key) {
                 $translatedAttribute = $attribute;
             }
 
