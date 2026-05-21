@@ -178,6 +178,8 @@ return [
     |
     */
 
+    'unique_role_permissions' => 'A role with the same set of permissions already exists (:role). Please modify the permissions to avoid redundancy.',
+
     'custom' => [
         'nhc_mobile' => [
             'digits' => 'The mobile number must be exactly 10 digits.',

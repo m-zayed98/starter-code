@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\UniqueRolePermissions;
 use App\Rules\UniqueTranslation;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -18,7 +19,7 @@ class UpdateRoleRequest extends FormRequest
             'name' => ['required', 'array'],
             'name.en' => ['required', 'string', 'max:20', new UniqueTranslation(table: 'roles', column: 'name', locale: 'en', ignoreId: $this->role)],
             'name.ar' => ['required', 'string', 'max:20', new UniqueTranslation(table: 'roles', column: 'name', locale: 'ar', ignoreId: $this->role)],
-            'permissions' => ['required', 'array'],
+            'permissions' => ['required', 'array', new UniqueRolePermissions(ignoreId: $this->role)],
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ];
     }
