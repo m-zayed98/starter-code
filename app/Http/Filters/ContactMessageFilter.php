@@ -21,7 +21,7 @@ class ContactMessageFilter extends BaseFilters
     /**
      * Filter by search term.
      *
-     * @param string $value
+     * @param  string  $value
      * @return void
      */
     protected function search($value)
@@ -51,14 +51,13 @@ class ContactMessageFilter extends BaseFilters
 
     protected function message_type($value)
     {
-        dd($value);
         $this->builder->where('message_type', $value);
     }
 
     /**
      * Filter by status.
      *
-     * @param string $value
+     * @param  string  $value
      * @return void
      */
     protected function status($value)
