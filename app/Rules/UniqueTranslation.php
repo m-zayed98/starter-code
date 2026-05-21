@@ -27,7 +27,14 @@ class UniqueTranslation implements ValidationRule
         }
 
         if ($query->exists()) {
-            $fail(__('validation.unique_translation', ['attribute' => $attribute, 'locale' => $this->locale]));
+            $translatedAttribute = __('validation.attributes.'.$attribute, [], app()->getLocale());
+
+            // Fall back to the raw attribute name if no translation is defined
+            if ($translatedAttribute === 'validation.attributes.'.$attribute) {
+                $translatedAttribute = $attribute;
+            }
+
+            $fail(__('validation.unique_translation', ['attribute' => $translatedAttribute]));
         }
     }
 }
