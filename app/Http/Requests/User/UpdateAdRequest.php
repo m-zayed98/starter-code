@@ -3,23 +3,45 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\AdPurpose;
+use App\Enums\AdStatus;
 use App\Enums\ApartmentCondition;
 use App\Enums\FurnishingStatus;
 use App\Enums\RentalPeriod;
+use App\Repositories\Contracts\AdRepositoryContract;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateAdRequest extends FormRequest
 {
+    public function __construct(
+        private readonly AdRepositoryContract $adRepository,
+    ) {
+        parent::__construct();
+    }
+
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Determine whether the ad being updated is still in draft status.
+     */
+    private function adIsDraft(): bool
+    {
+        $adId = (int) $this->route('id');
+        $userId = (int) auth('api')->id();
+
+        $ad = $this->adRepository->findForUser($adId, $userId);
+
+        return $ad !== null && $ad->status === AdStatus::DRAFT;
+    }
+
     public function rules(): array
     {
         $purpose = $this->input('purpose');
+        $isDraft = $this->adIsDraft();
 
         return [
             // ── Step 2: Ad meta ───────────────────────────────────────────
@@ -94,6 +116,7 @@ class UpdateAdRequest extends FormRequest
 
             // ── Step 4: Media ─────────────────────────────────────────────
             'cover_image' => [
+                Rule::requiredIf($isDraft),
                 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png',
@@ -101,6 +124,7 @@ class UpdateAdRequest extends FormRequest
             ],
 
             'apartment_images' => [
+                Rule::requiredIf($isDraft),
                 'nullable',
                 'array',
                 'min:1',
