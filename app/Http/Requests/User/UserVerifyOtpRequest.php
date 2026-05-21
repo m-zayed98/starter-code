@@ -10,19 +10,11 @@ use Illuminate\Validation\Rule;
 
 class UserVerifyOtpRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $purposesRequiringFcmToken = [
@@ -34,7 +26,7 @@ class UserVerifyOtpRequest extends FormRequest
 
         return [
             'email' => ['required_without:phone', 'nullable', 'string', 'email'],
-            'country_code' => ['required_with:phone', 'nullable', new ValidDialCode(), 'bail'],
+            'country_code' => ['required_with:phone', 'nullable', new ValidDialCode, 'bail'],
             'phone' => [
                 'required_without:email',
                 'nullable',
@@ -45,15 +37,6 @@ class UserVerifyOtpRequest extends FormRequest
             'purpose' => ['required', 'string'],
             'fcm_token' => [$fcmTokenRequired ? 'required' : 'nullable', 'string'],
             'device_type' => ['nullable', 'string', Rule::in(['ios', 'android', 'web'])],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'email.required_without' => 'The email field is required.',
-            'phone.required_without' => 'The phone field is required.',
-            'fcm_token.required' => 'The FCM token is required for login and registration.',
         ];
     }
 

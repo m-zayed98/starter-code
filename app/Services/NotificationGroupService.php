@@ -23,38 +23,38 @@ class NotificationGroupService extends BaseModelService
     public function get(array|QueryOptions $options = []): Collection|LengthAwarePaginator
     {
         $options = $this->normalizeOptions($options);
-        
+
         // Always load creator and count recipients
         $relations = array_merge($options->relations, ['creator']);
         $options = QueryOptions::make(array_merge($options->toArray(), [
             'relations' => $relations,
         ]));
-        
+
         $result = $this->repository->get($options);
-        
+
         // Load counts
         if ($result instanceof LengthAwarePaginator) {
             $result->getCollection()->loadCount('recipients');
         } else {
             $result->loadCount('recipients');
         }
-        
+
         return $result;
     }
 
     public function showOrFail(int $id, array|QueryOptions $options = []): Model
     {
         $options = $this->normalizeOptions($options);
-        
+
         // Always load creator and recipients for detail view
         $relations = array_merge($options->relations, ['creator', 'recipients']);
         $options = QueryOptions::make(array_merge($options->toArray(), [
             'relations' => $relations,
         ]));
-        
+
         $model = $this->repository->showOrFail($id, $options);
         $model->loadCount('recipients');
-        
+
         return $model;
     }
 
@@ -65,9 +65,9 @@ class NotificationGroupService extends BaseModelService
             $userIds = Arr::pull($data, 'user_ids', []);
 
             $group = $this->repository->create([
-                'title'      => $data['title'],
-                'body'       => $data['body'],
-                'status'     => NotificationGroup::STATUS_PENDING,
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'status' => NotificationGroup::STATUS_PENDING,
                 'created_by' => $data['created_by'],
             ]);
 
@@ -81,9 +81,9 @@ class NotificationGroupService extends BaseModelService
     {
         /** @var NotificationGroup $group */
         $group = $this->repository->showOrFail($id);
-        
+
         if ($group->status !== NotificationGroup::STATUS_PENDING) {
-            throw new \DomainException('Only pending notifications can be deleted.');
+            throw new \DomainException(__('Only pending notifications can be deleted.'));
         }
 
         return $this->repository->delete($id, $forceDelete);
@@ -98,10 +98,10 @@ class NotificationGroupService extends BaseModelService
     {
         $group = $this->create($data);
         $this->send($group->id);
-        
+
         // Reload with counts
         $group->loadCount('recipients');
-        
+
         return $group;
     }
 
@@ -112,4 +112,3 @@ class NotificationGroupService extends BaseModelService
             : QueryOptions::make($options);
     }
 }
-

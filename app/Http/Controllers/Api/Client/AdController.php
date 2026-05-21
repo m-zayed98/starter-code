@@ -11,7 +11,9 @@ use App\Http\Resources\Client\AdListResource;
 use App\Http\Resources\Client\AdMapResource;
 use App\Http\Resources\Client\AdReportResource;
 use App\Http\Resources\Client\AdReviewResource;
+use App\Models\User;
 use App\Services\PublicAdService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 
 class AdController extends Controller
@@ -22,11 +24,6 @@ class AdController extends Controller
 
     /**
      * GET /public/ads/map
-     *
-     * Minimized listing of published ads for map pin rendering.
-     * Returns only id, title, cover_image, price, latitude, longitude.
-     * Accessible by guests and authenticated users.
-     * Supports the same query filters as the public listing.
      */
     public function map(): JsonResponse
     {
@@ -39,14 +36,6 @@ class AdController extends Controller
 
     /**
      * GET /public/ads
-     *
-     * Public paginated listing of published ads.
-     * Accessible by guests and authenticated users.
-     *
-     * Supported query params (all optional):
-     *   search, purpose, apartment_condition, rental_period,
-     *   furnishing_status, price_min, price_max,
-     *   property_type, region, city, district
      */
     public function index(): JsonResponse
     {
@@ -59,21 +48,17 @@ class AdController extends Controller
 
     /**
      * GET /public/ads/{id}
-     *
-     * Full detail view of a single published ad.
-     * Accessible by guests and authenticated users.
-     * Sensitive contact fields (nhc_mobile, advertiser_phone) are hidden for guests.
-     * Records a view action for authenticated users (deduplicated per user per ad).
      */
     public function show(int $id): JsonResponse
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = auth('api')->user();
+
         try {
             $ad = $this->publicAdService->showPublishedAd($id, $user?->id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('الإعلان غير موجود.'),
+                __('Ad not found.'),
                 httpStatus: 404,
             )->send();
         }
@@ -83,13 +68,10 @@ class AdController extends Controller
 
     /**
      * POST /public/ads/{id}/reviews
-     *
-     * Submit a star rating + optional feedback for a published ad.
-     * Requires authentication. One review per user per ad.
      */
     public function storeReview(StoreAdReviewRequest $request, int $id): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = auth('api')->user();
 
         try {
@@ -99,9 +81,9 @@ class AdController extends Controller
                 rating: $request->validated('rating'),
                 feedback: $request->validated('feedback'),
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('الإعلان غير موجود.'),
+                __('Ad not found.'),
                 httpStatus: 404,
             )->send();
         } catch (\DomainException $e) {
@@ -113,20 +95,17 @@ class AdController extends Controller
 
         return ApiResponse::respondWithModel(
             new AdReviewResource($review),
-            message: __('تم إرسال تقييمك بنجاح.'),
+            message: __('Your review has been submitted successfully.'),
             httpStatus: 201,
         )->send();
     }
 
     /**
      * POST /public/ads/{id}/reports
-     *
-     * Report a published ad with a written reason.
-     * Requires authentication. One report per user per ad.
      */
     public function storeReport(StoreAdReportRequest $request, int $id): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = auth('api')->user();
 
         try {
@@ -135,9 +114,9 @@ class AdController extends Controller
                 userId: $user->id,
                 reason: $request->validated('reason'),
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('الإعلان غير موجود.'),
+                __('Ad not found.'),
                 httpStatus: 404,
             )->send();
         } catch (\DomainException $e) {
@@ -149,7 +128,7 @@ class AdController extends Controller
 
         return ApiResponse::respondWithModel(
             new AdReportResource($report),
-            message: __('تم إرسال بلاغك بنجاح.'),
+            message: __('Your report has been submitted successfully.'),
             httpStatus: 201,
         )->send();
     }

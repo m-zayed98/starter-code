@@ -8,5 +8,9 @@ enum OtpPurpose: string
     case REGISTER = 'register';
     case FORGOT_PASSWORD = 'forget_password';
     case CHANGE_PHONE = 'change_phone';
-}
 
+    public function label(): string
+    {
+        return __($this->value);
+    }
+}

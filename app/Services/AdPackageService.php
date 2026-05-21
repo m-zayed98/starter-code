@@ -113,7 +113,7 @@ class AdPackageService extends BaseModelService
 
         if ($this->repository->hasActiveSubscriptions($id)) {
             throw new \DomainException(
-                'هذه الباقه مرتبطه بعدد من الاشتراكات الجارية لذا لا يمكن حذفها'
+                __('This package has active subscriptions and cannot be deleted.')
             );
         }
 

@@ -67,23 +67,4 @@ class InitiateAdRequest extends FormRequest
             ],
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'fal_license_number.required'              => __('هذا الحقل إلزامي'),
-            'fal_license_number.digits_between'        => __('رقم رخصة فال يجب أن يتكون من 6 إلى 12 رقماً'),
-            'nhc_mobile.required'                      => __('هذا الحقل إلزامي'),
-            'nhc_mobile.digits'                        => __('رقم الجوال يجب أن يتكون من 10 أرقام'),
-            'nhc_mobile.regex'                         => __('رقم الجوال يجب أن يبدأ بـ 05'),
-            'advertiser_type.required'                 => __('هذا الحقل إلزامي'),
-            'advertiser_type.Illuminate\Validation\Rules\Enum' => __('نوع المعلن غير صحيح'),
-            'commercial_registration_number.required'  => __('هذا الحقل إلزامي'),
-            'commercial_registration_file.required'    => __('هذا الحقل إلزامي'),
-            'commercial_registration_file.mimes'       => __('يجب أن يكون الملف بصيغة jpg أو png أو jpeg أو pdf'),
-            'commercial_registration_file.max'         => __('الحد الأقصى لحجم الملف 5 MB'),
-            'ad_license_number.required'               => __('هذا الحقل إلزامي'),
-            'ad_license_number.digits_between'         => __('رقم رخصة الإعلان يجب أن يتكون من 6 إلى 12 رقماً'),
-        ];
-    }
 }
