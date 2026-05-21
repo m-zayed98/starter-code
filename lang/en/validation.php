@@ -178,6 +178,7 @@ return [
     |
     */
 
+    'unique_translation' => 'The :attribute has already been taken.',
     'unique_role_permissions' => 'A role with the same set of permissions already exists (:role). Please modify the permissions to avoid redundancy.',
 
     'custom' => [

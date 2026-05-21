@@ -123,6 +123,7 @@ return [
     |
     */
 
+    'unique_translation' => ':attribute مستخدم من قبل.',
     'unique_role_permissions' => 'يوجد دور بنفس مجموعة الصلاحيات بالفعل (:role). يرجى تعديل الصلاحيات لتجنب التكرار.',
 
     'custom' => [

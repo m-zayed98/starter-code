@@ -27,7 +27,7 @@ class UniqueTranslation implements ValidationRule
         }
 
         if ($query->exists()) {
-            $fail("The {$attribute} has already been taken for locale '{$this->locale}'.");
+            $fail(__('validation.unique_translation', ['attribute' => $attribute, 'locale' => $this->locale]));
         }
     }
 }
