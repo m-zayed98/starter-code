@@ -30,10 +30,8 @@ class UpdateAdRequest extends FormRequest
      */
     private function adIsDraft(): bool
     {
-        $adId = (int) $this->route('id');
-        $userId = (int) auth('api')->id();
-
-        $ad = $this->adRepository->findForUser($adId, $userId);
+        $adId = (int) $this->route('ad');
+        $ad = $this->adRepository->show($adId);
 
         return $ad !== null && $ad->status === AdStatus::DRAFT;
     }
