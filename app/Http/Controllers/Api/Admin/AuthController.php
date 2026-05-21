@@ -26,7 +26,7 @@ class AuthController extends BaseAuthController
     {
         $admin = auth($this->guard)->user();
         if (! $admin) {
-            return ApiResponse::respondWithError('Unauthenticated.', httpStatus: 401)->send();
+            return ApiResponse::respondWithError(__('Unauthenticated.'), httpStatus: 401)->send();
         }
 
         $data = $request->validated();

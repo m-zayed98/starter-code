@@ -7,22 +7,12 @@ use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         $admin = auth('admin')->user();
 
@@ -33,15 +23,5 @@ class UpdateProfileRequest extends FormRequest
             'password' => ['sometimes', 'nullable', 'string', 'min:8'],
             'avatar' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
         ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        return [];
     }
 }

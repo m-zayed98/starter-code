@@ -1,4 +1,10 @@
 {
+    "Blog created successfully.": "تم إنشاء المقال بنجاح.",
+    "Blog updated successfully.": "تم تحديث المقال بنجاح.",
+    "Blog deleted successfully.": "تم حذف المقال بنجاح.",
+    "Blog status updated successfully.": "تم تحديث حالة المقال بنجاح.",
+    "Comment visibility updated successfully.": "تم تحديث حالة ظهور التعليق بنجاح.",
+    "Comment deleted successfully.": "تم حذف التعليق بنجاح.",
     "Logged out successfully": "تم تسجيل الخروج بنجاح",
     "Account deleted successfully": "تم حذف الحساب بنجاح",
     "Updated successfully": "تم التحديث بنجاح",

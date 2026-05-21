@@ -146,6 +146,18 @@ return [
         'apartment_video' => [
             'mimes' => 'يجب أن يكون الفيديو بصيغة mp4 أو mov.',
         ],
+        'avatar' => [
+            'mimes' => 'يجب أن تكون الصورة الشخصية بصيغة jpeg أو png أو jpg أو webp.',
+        ],
+        'image' => [
+            'mimes' => 'يجب أن تكون الصورة بصيغة jpg أو jpeg أو png أو webp.',
+        ],
+        'main_image_ar' => [
+            'mimes' => 'يجب أن تكون الصورة الرئيسية (عربي) بصيغة jpg أو jpeg أو png أو webp.',
+        ],
+        'main_image_en' => [
+            'mimes' => 'يجب أن تكون الصورة الرئيسية (إنجليزي) بصيغة jpg أو jpeg أو png أو webp.',
+        ],
     ],
 
     /*

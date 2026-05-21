@@ -1,4 +1,10 @@
 {
+    "Blog created successfully.": "Blog created successfully.",
+    "Blog updated successfully.": "Blog updated successfully.",
+    "Blog deleted successfully.": "Blog deleted successfully.",
+    "Blog status updated successfully.": "Blog status updated successfully.",
+    "Comment visibility updated successfully.": "Comment visibility updated successfully.",
+    "Comment deleted successfully.": "Comment deleted successfully.",
     "Logged out successfully": "Logged out successfully",
     "Account deleted successfully": "Account deleted successfully",
     "Updated successfully": "Updated successfully",

@@ -201,6 +201,18 @@ return [
         'apartment_video' => [
             'mimes' => 'The apartment video must be of type: mp4 or mov.',
         ],
+        'avatar' => [
+            'mimes' => 'The avatar must be of type: jpeg, png, jpg, or webp.',
+        ],
+        'image' => [
+            'mimes' => 'The image must be of type: jpg, jpeg, png, or webp.',
+        ],
+        'main_image_ar' => [
+            'mimes' => 'The main image (Arabic) must be of type: jpg, jpeg, png, or webp.',
+        ],
+        'main_image_en' => [
+            'mimes' => 'The main image (English) must be of type: jpg, jpeg, png, or webp.',
+        ],
     ],
 
     /*
