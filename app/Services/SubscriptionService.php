@@ -17,8 +17,8 @@ class SubscriptionService
 {
     public function __construct(
         private readonly SubscriptionRepositoryContract $subscriptionRepository,
-        private readonly TransactionRepositoryContract  $transactionRepository,
-        private readonly AdPackageRepositoryContract    $adPackageRepository,
+        private readonly TransactionRepositoryContract $transactionRepository,
+        private readonly AdPackageRepositoryContract $adPackageRepository,
     ) {}
 
     // ─── Public API ───────────────────────────────────────────────────────
@@ -39,14 +39,33 @@ class SubscriptionService
         $this->assertPackageAvailable($package);
         $this->assertUserHasNoActiveSubscription($userId);
 
-        return $this->transactionRepository->create([
-            'user_id'              => $userId,
+        $transaction = $this->transactionRepository->create([
+            'user_id' => $userId,
             'transactionable_type' => AdPackage::class,
-            'transactionable_id'   => $package->id,
-            'amount'               => $package->price,
-            'status'               => TransactionStatus::COMPLETED->value,
-            'reference'            => Str::uuid()->toString(),
+            'transactionable_id' => $package->id,
+            'amount' => $package->price,
+            'status' => TransactionStatus::COMPLETED->value,
+            'reference' => Str::uuid()->toString(),
         ])->load(['transactionable']);
+
+        $startsAt = now()->toDateString();
+        $expiresAt = now()->addDays($package->duration_days)
+            ->addHours($package->duration_hours)
+            ->toDateString();
+
+        $this->subscriptionRepository->createFromTransaction([
+            'user_id' => $transaction->user_id,
+            'ad_package_id' => $package->id,
+            'ad_count' => $package->ads_count,
+            'user_ads_count' => 0,
+            'package_price' => $package->price,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'starts_at' => $startsAt,
+            'expires_at' => $expiresAt,
+            'is_cancelled' => false,
+        ]);
+
+        return $transaction;
     }
 
     /**
@@ -87,19 +106,19 @@ class SubscriptionService
             $package = $this->adPackageRepository->showOrFail($transaction->transactionable_id);
         }
 
-        $startsAt  = now()->toDateString();
+        $startsAt = now()->toDateString();
         $expiresAt = now()->addDays($package->duration_days)->toDateString();
 
         return $this->subscriptionRepository->createFromTransaction([
-            'user_id'        => $transaction->user_id,
-            'ad_package_id'  => $package->id,
-            'ad_count'       => $package->ads_count,
+            'user_id' => $transaction->user_id,
+            'ad_package_id' => $package->id,
+            'ad_count' => $package->ads_count,
             'user_ads_count' => 0,
-            'package_price'  => $package->price,
-            'status'         => SubscriptionStatus::ACTIVE->value,
-            'starts_at'      => $startsAt,
-            'expires_at'     => $expiresAt,
-            'is_cancelled'   => false,
+            'package_price' => $package->price,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'starts_at' => $startsAt,
+            'expires_at' => $expiresAt,
+            'is_cancelled' => false,
         ]);
     }
 
