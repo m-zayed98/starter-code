@@ -49,7 +49,7 @@ class ContactMessageFilter extends BaseFilters
         $this->builder->where('email', 'like', "%{$value}%");
     }
 
-    protected function message_type($value)
+    protected function messageType($value)
     {
         $this->builder->where('message_type', $value);
     }
