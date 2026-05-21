@@ -27,7 +27,7 @@ class InitiateAdRequest extends FormRequest
             // ── FAL license (saved to user profile) ───────────────────────
             'fal_license_number' => [
                 'required',
-                'digits_between:6,12',
+                'regex:/^\d{6,12}$/',
             ],
 
             // ── NHC mobile (saved to user profile) ────────────────────────
@@ -61,9 +61,10 @@ class InitiateAdRequest extends FormRequest
             ],
 
             // ── Per-ad advertisement license number ───────────────────────
+            // Must be purely numeric, between 6 and 12 digits (no decimals, no signs).
             'ad_license_number' => [
                 'required',
-                'digits_between:6,12',
+                'regex:/^\d{6,12}$/',
             ],
         ];
     }
