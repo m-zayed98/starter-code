@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\DTOs\NhcAdDataDTO;
 use App\Enums\AdStatus;
+use App\Exceptions\AdException;
 use App\Facades\MediaUpload;
 use App\Models\Ad;
 use App\Repositories\Contracts\AdRepositoryContract;
+use App\Repositories\Contracts\SubscriptionRepositoryContract;
 use App\Repositories\Contracts\UserRepositoryContract;
+use App\Settings\GeneralSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -16,8 +19,10 @@ use Illuminate\Support\Facades\DB;
 class AdService
 {
     public function __construct(
-        private readonly AdRepositoryContract   $adRepository,
-        private readonly UserRepositoryContract $userRepository,
+        private readonly AdRepositoryContract           $adRepository,
+        private readonly UserRepositoryContract         $userRepository,
+        private readonly SubscriptionRepositoryContract $subscriptionRepository,
+        private readonly GeneralSetting                 $generalSetting,
     ) {}
 
     // ─── Public API ───────────────────────────────────────────────────────
@@ -26,20 +31,26 @@ class AdService
      * Step 1 – Initiate ad creation.
      *
      * Flow:
-     *  1. Validate that no ad with the same ad_license_number exists.
-     *  2. Persist FAL advertiser profile fields to the user (first time only).
-     *  3. Call NHC (mock) to fetch property data.
-     *  4. Create the ad in DRAFT status with NHC data stored in nhc_data JSON.
-     *  5. Return the newly created Ad.
+     *  1. Validate subscription rules (configurable via config/ads.php).
+     *  2. Validate that no ad with the same ad_license_number exists.
+     *  3. Persist FAL advertiser profile fields to the user (first time only).
+     *  4. Call NHC (mock) to fetch property data.
+     *  5. Create the ad in DRAFT status with NHC data stored in nhc_data JSON.
+     *  6. Increment user_ads_count on the active subscription (if any).
+     *  7. Return the newly created Ad.
      *
      * @param int   $userId
      * @param array $data  Validated payload from InitiateAdRequest
      * @return Ad
      *
-     * @throws \DomainException  When an ad with the same ad_license_number already exists.
+     * @throws AdException               When subscription rules are violated.
+     * @throws \DomainException          When an ad with the same ad_license_number already exists.
      */
     public function initiateAd(int $userId, array $data): Ad
     {
+        // ── Subscription guards ───────────────────────────────────────────
+        $subscription = $this->assertCanCreateAd($userId);
+
         $adLicenseNumber = $data['ad_license_number'];
 
         // Guard: prevent duplicate ads
@@ -49,7 +60,7 @@ class AdService
             );
         }
 
-        return DB::transaction(function () use ($userId, $data, $adLicenseNumber) {
+        return DB::transaction(function () use ($userId, $data, $adLicenseNumber, $subscription) {
             // Persist FAL profile to user (only fields that are not yet set)
             $this->syncUserFalProfile($userId, $data);
 
@@ -66,15 +77,21 @@ class AdService
                 $this->uploadCommercialRegistration($userId, $data['commercial_registration_file']);
             }
 
-            // Create the ad in DRAFT status
+            // Create the ad in DRAFT status, stamping the active package_id (if any)
             /** @var Ad $ad */
             $ad = $this->adRepository->create([
                 'user_id'            => $userId,
+                'package_id'         => $subscription?->ad_package_id,
                 'fal_license_number' => $data['fal_license_number'],
                 'ad_license_number'  => $adLicenseNumber,
                 'nhc_data'           => $nhcDto->toArray(),
                 'status'             => AdStatus::DRAFT->value,
             ]);
+
+            // Increment the subscription's used-ads counter (when a subscription is active)
+            if ($subscription !== null) {
+                $this->subscriptionRepository->incrementUserAdsCount($subscription->id);
+            }
 
             return $ad->load('media');
         });
@@ -242,6 +259,50 @@ class AdService
     }
 
     // ─── Private Helpers ──────────────────────────────────────────────────
+
+    /**
+     * Validate subscription rules before allowing ad creation.
+     *
+     * Rules (each individually configurable via config/ads.php):
+     *
+     *  1. ENABLE_AD_CREATION_WITHOUT_PACKAGE (default: false)
+     *     When false, the user must have an active subscription.
+     *     Skipped entirely when the free_period is enabled in GeneralSetting.
+     *
+     *  2. ALLOW_ADDING_INFINITE_ADS (default: false)
+     *     When false, the user cannot exceed their subscription's ads_count quota.
+     *
+     * @return \App\Models\Subscription|null  The active subscription (or null during free period).
+     *
+     * @throws AdException
+     */
+    private function assertCanCreateAd(int $userId): ?\App\Models\Subscription
+    {
+        $isFreePeriod = $this->generalSetting->is_free_period_enabled;
+
+        // During a free period all subscription checks are bypassed
+        if ($isFreePeriod) {
+            return null;
+        }
+
+        $subscription = $this->subscriptionRepository->findActiveByUser($userId);
+
+        // Guard 1: require an active subscription (unless config allows creation without one)
+        if (! config('ads.ENABLE_AD_CREATION_WITHOUT_PACKAGE') && $subscription === null) {
+            throw AdException::noActiveSubscription();
+        }
+
+        // Guard 2: enforce quota (unless config allows infinite ads)
+        if (
+            ! config('ads.ALLOW_ADDING_INFINITE_ADS')
+            && $subscription !== null
+            && ! $subscription->hasQuota()
+        ) {
+            throw AdException::quotaExceeded();
+        }
+
+        return $subscription;
+    }
 
     /**
      * Sync FAL advertiser profile fields to the user record.

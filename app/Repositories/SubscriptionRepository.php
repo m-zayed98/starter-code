@@ -73,4 +73,15 @@ class SubscriptionRepository extends BaseRepository implements SubscriptionRepos
 
         return $subscription->load(['adPackage']);
     }
+
+    /**
+     * Atomically increment user_ads_count for the given subscription.
+     * Uses a direct DB increment to avoid race conditions.
+     */
+    public function incrementUserAdsCount(int $subscriptionId): void
+    {
+        $this->model->newQuery()
+            ->where('id', $subscriptionId)
+            ->increment('user_ads_count');
+    }
 }

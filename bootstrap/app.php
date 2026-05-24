@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\AdException;
 use App\Exceptions\SubscriptionException;
 use App\Facades\ApiResponse;
 use App\Services\ApiResponse\StatusCode;
@@ -30,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/api.php'));
 
             // Admin API Routes - Version 1
-            Route::middleware(['api' , 'locale'])
+            Route::middleware(['api', 'locale'])
                 ->prefix('api/v1/admin')
                 ->name('admin.v1.')
                 ->group(base_path('routes/admin.php'));
@@ -81,6 +82,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // ── Subscription domain exceptions ────────────────────────────
             if ($e instanceof SubscriptionException) {
+                return $e->render();
+            }
+
+            // ── Ad domain exceptions ──────────────────────────────────────
+            if ($e instanceof AdException) {
                 return $e->render();
             }
 

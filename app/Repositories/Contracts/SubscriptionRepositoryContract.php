@@ -28,4 +28,9 @@ interface SubscriptionRepositoryContract extends RepositoryContract
      * Create a subscription from a completed transaction.
      */
     public function createFromTransaction(array $data): Subscription;
+
+    /**
+     * Increment the user_ads_count for a given subscription by 1.
+     */
+    public function incrementUserAdsCount(int $subscriptionId): void;
 }

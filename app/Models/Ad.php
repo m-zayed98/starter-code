@@ -22,6 +22,7 @@ class Ad extends Model implements HasMedia
     protected $fillable = [
         // ── Ownership ──────────────────────────────────────────────────────
         'user_id',
+        'package_id',
 
         // ── FAL / NHC identifiers ──────────────────────────────────────────
         'fal_license_number',
@@ -85,6 +86,11 @@ class Ad extends Model implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function adPackage(): BelongsTo
+    {
+        return $this->belongsTo(AdPackage::class, 'package_id');
     }
 
     public function reviews(): HasMany

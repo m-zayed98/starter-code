@@ -14,8 +14,6 @@ class SubscriptionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $locale = app()->getLocale();
-
         return [
             'id'              => $this->id,
             'status'          => $this->status->value,
@@ -29,10 +27,10 @@ class SubscriptionResource extends JsonResource
             'is_active'       => $this->isActive(),
             'is_expired'      => $this->isExpired(),
             'can_be_used'     => $this->canBeUsed(),
-            'package'         => $this->whenLoaded('adPackage', function () use ($locale) {
+            'package'         => $this->whenLoaded('adPackage', function () {
                 return [
                     'id'            => $this->adPackage->id,
-                    'name'          => $this->adPackage->getTranslation('name', $locale),
+                    'name'          => $this->adPackage->name,
                     'type'          => $this->adPackage->type->value,
                     'duration_days' => $this->adPackage->duration_days,
                     'image'         => $this->adPackage->getFirstMediaUrl('image') ?: null,
