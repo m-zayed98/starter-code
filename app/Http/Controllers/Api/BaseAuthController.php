@@ -6,6 +6,8 @@ use App\Auth\Login\UsingOtpLoginStrategy;
 use App\Enums\OtpPurpose;
 use App\Facades\ApiResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -13,9 +15,13 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 abstract class BaseAuthController extends Controller
 {
     protected string $guard = 'api';
+
     protected string $authModel;
+
     protected string $loginKey = 'email';
+
     protected $loginFormRequest = null;
+
     protected $authService = null;
 
     public function login(Request $request): JsonResponse
@@ -28,6 +34,7 @@ abstract class BaseAuthController extends Controller
 
         return ApiResponse::respondWithArray($data)->send();
     }
+
     public function forgotPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -52,6 +59,7 @@ abstract class BaseAuthController extends Controller
             'otp' => $result['otp']->code,
         ])->send();
     }
+
     public function verifyOtp(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -75,7 +83,7 @@ abstract class BaseAuthController extends Controller
         }
 
         if (property_exists($user, 'status') && ($user->status ?? null) === 'inactive') {
-            return ApiResponse::respondWithError('لقد تم تعطيل حسابك، الرجاء التواصل مع الإدارة', httpStatus: 403)->send();
+            return ApiResponse::respondWithError(__('Your account has been disabled. Please contact the administration.'), httpStatus: 403)->send();
         }
 
         $valid = $user->consumeOtp($purpose->value, $data['code']);
@@ -92,13 +100,14 @@ abstract class BaseAuthController extends Controller
             'token' => $token,
         ])->send();
     }
+
     public function resetPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
         ]);
 
-        /** @var \Illuminate\Database\Eloquent\Model&\Illuminate\Contracts\Auth\Authenticatable|null $user */
+        /** @var Model&Authenticatable|null $user */
         $user = auth($this->guard)->user();
         if (! $user) {
             return ApiResponse::respondWithError('Unauthenticated.', httpStatus: 401)->send();

@@ -3,23 +3,43 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\AdPurpose;
+use App\Enums\AdStatus;
 use App\Enums\ApartmentCondition;
 use App\Enums\FurnishingStatus;
 use App\Enums\RentalPeriod;
+use App\Repositories\Contracts\AdRepositoryContract;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateAdRequest extends FormRequest
 {
+    public function __construct(
+        private readonly AdRepositoryContract $adRepository,
+    ) {
+        parent::__construct();
+    }
+
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Determine whether the ad being updated is still in draft status.
+     */
+    private function adIsDraft(): bool
+    {
+        $adId = (int) $this->route('ad');
+        $ad = $this->adRepository->show($adId);
+
+        return $ad !== null && $ad->status === AdStatus::DRAFT;
+    }
+
     public function rules(): array
     {
         $purpose = $this->input('purpose');
+        $isDraft = $this->adIsDraft();
 
         return [
             // ── Step 2: Ad meta ───────────────────────────────────────────
@@ -94,14 +114,16 @@ class UpdateAdRequest extends FormRequest
 
             // ── Step 4: Media ─────────────────────────────────────────────
             'cover_image' => [
-                'required',
+                Rule::requiredIf($isDraft),
+                'nullable',
                 'image',
                 'mimes:jpg,jpeg,png',
                 'max:5120', // 5 MB
             ],
 
             'apartment_images' => [
-                'required',
+                Rule::requiredIf($isDraft),
+                'nullable',
                 'array',
                 'min:1',
                 'max:10',
@@ -119,38 +141,6 @@ class UpdateAdRequest extends FormRequest
                 'mimes:mp4,mov',
                 'max:51200', // 50 MB
             ],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'purpose.required'                  => __('هذا الحقل إلزامي'),
-            'title.required'                    => __('هذا الحقل إلزامي'),
-            'title.min'                         => __('عنوان الإعلان يجب أن يكون 5 أحرف على الأقل'),
-            'title.max'                         => __('عنوان الإعلان يجب ألا يتجاوز 50 حرفاً'),
-            'description.required'              => __('هذا الحقل إلزامي'),
-            'description.max'                   => __('الوصف يجب ألا يتجاوز 500 حرف'),
-            'apartment_condition.required'      => __('هذا الحقل إلزامي'),
-            'deed_number.required'              => __('هذا الحقل إلزامي'),
-            'living_rooms_count.required'       => __('هذا الحقل إلزامي'),
-            'living_rooms_count.min'            => __('عدد الصالات يجب أن يكون 1 على الأقل'),
-            'bathrooms_count.required'          => __('هذا الحقل إلزامي'),
-            'bathrooms_count.min'               => __('عدد الحمامات يجب أن يكون 1 على الأقل'),
-            'floor.required'                    => __('هذا الحقل إلزامي'),
-            'floor.min'                         => __('الطابق يجب أن يكون 1 على الأقل'),
-            'furnishing_status.required'        => __('هذا الحقل إلزامي'),
-            'price.required'                    => __('هذا الحقل إلزامي'),
-            'rental_period.required'            => __('هذا الحقل إلزامي'),
-            'cover_image.required'              => __('هذا الحقل إلزامي'),
-            'cover_image.max'                   => __('الحد الأقصى لحجم الملف 5 MB'),
-            'cover_image.mimes'                 => __('يجب أن تكون الصورة بصيغة jpg أو jpeg أو png'),
-            'apartment_images.required'         => __('هذا الحقل إلزامي'),
-            'apartment_images.max'              => __('يمكن رفع 10 صور كحد أقصى'),
-            'apartment_images.*.max'            => __('الحد الأقصى لحجم الملف 5 MB'),
-            'apartment_images.*.mimes'          => __('يجب أن تكون الصورة بصيغة jpg أو jpeg أو png'),
-            'apartment_video.max'               => __('الحد الأقصى لحجم الملف 50 MB'),
-            'apartment_video.mimes'             => __('يجب أن يكون الفيديو بصيغة mp4 أو mov'),
         ];
     }
 }

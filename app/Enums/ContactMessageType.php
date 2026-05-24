@@ -9,5 +9,9 @@ enum ContactMessageType: string
     case INQUIRY = 'inquiry';
     case COMPLAINT = 'complaint';
     case OTHER = 'other';
-}
 
+    public function label(): string
+    {
+        return __($this->value);
+    }
+}

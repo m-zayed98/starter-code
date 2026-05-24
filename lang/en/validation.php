@@ -178,9 +178,43 @@ return [
     |
     */
 
+    'unique_translation' => 'The :attribute has already been taken.',
+    'unique_role_permissions' => 'A role with the same set of permissions already exists (:role). Please modify the permissions to avoid redundancy.',
+
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'nhc_mobile' => [
+            'digits' => 'The mobile number must be exactly 10 digits.',
+            'regex' => 'The mobile number must start with 05.',
+        ],
+        'whatsapp_number' => [
+            'regex' => 'The WhatsApp number must be a valid Saudi mobile number starting with 05.',
+        ],
+        'contact_numbers.*' => [
+            'regex' => 'Each contact number must be a valid Saudi mobile number starting with 05.',
+        ],
+        'commercial_registration_file' => [
+            'mimes' => 'The commercial registration file must be of type: jpg, jpeg, png, or pdf.',
+        ],
+        'cover_image' => [
+            'mimes' => 'The cover image must be of type: jpg, jpeg, or png.',
+        ],
+        'apartment_images.*' => [
+            'mimes' => 'Each apartment image must be of type: jpg, jpeg, or png.',
+        ],
+        'apartment_video' => [
+            'mimes' => 'The apartment video must be of type: mp4 or mov.',
+        ],
+        'avatar' => [
+            'mimes' => 'The avatar must be of type: jpeg, png, jpg, or webp.',
+        ],
+        'image' => [
+            'mimes' => 'The image must be of type: jpg, jpeg, png, or webp.',
+        ],
+        'main_image_ar' => [
+            'mimes' => 'The main image (Arabic) must be of type: jpg, jpeg, png, or webp.',
+        ],
+        'main_image_en' => [
+            'mimes' => 'The main image (English) must be of type: jpg, jpeg, png, or webp.',
         ],
     ],
 
@@ -196,23 +230,109 @@ return [
     */
 
     'attributes' => [
-        'name'            => 'Name',
-        'email'           => 'Email Address',
-        'phone'           => 'Phone Number',
-        'country_code'    => 'Country Code',
-        'avatar'          => 'Avatar',
-        'password'        => 'Password',
-        'is_active'       => 'Active Status',
-        'role_id'         => 'Role',
-        'type'            => 'Package Type',
-        'ads_count'       => 'Ads Count',
-        'duration_days'   => 'Duration (Days)',
-        'price'           => 'Price',
-        'start_date'      => 'Start Date',
-        'end_date'        => 'End Date',
+        'name' => 'Name',
+        'email' => 'Email Address',
+        'phone' => 'Phone Number',
+        'country_code' => 'Country Code',
+        'avatar' => 'Avatar',
+        'password' => 'Password',
+        'password_confirmation' => 'Password Confirmation',
+        'is_active' => 'Active Status',
+        'role_id' => 'Role',
+        'type' => 'Package Type',
+        'ads_count' => 'Ads Count',
+        'duration_days' => 'Duration (Days)',
+        'price' => 'Price',
+        'start_date' => 'Start Date',
+        'end_date' => 'End Date',
         'max_subscribers' => 'Max Subscribers',
-        'name.en'         => 'Name (English)',
-        'name.ar'         => 'Name (Arabic)',
+        'name_en' => 'Name (English)',
+        'name_ar' => 'Name (Arabic)',
+        // Ad fields
+        'fal_license_number' => 'FAL License Number',
+        'nhc_mobile' => 'NHC Mobile Number',
+        'advertiser_type' => 'Advertiser Type',
+        'commercial_registration_number' => 'Commercial Registration Number',
+        'commercial_registration_file' => 'Commercial Registration File',
+        'ad_license_number' => 'Ad License Number',
+        'purpose' => 'Ad Purpose',
+        'apartment_condition' => 'Apartment Condition',
+        'deed_number' => 'Deed Number',
+        'living_rooms_count' => 'Living Rooms Count',
+        'bathrooms_count' => 'Bathrooms Count',
+        'floor' => 'Floor',
+        'furnishing_status' => 'Furnishing Status',
+        'rental_period' => 'Rental Period',
+        'cover_image' => 'Cover Image',
+        'apartment_images' => 'Apartment Images',
+        'apartment_images.*' => 'Apartment Image',
+        'apartment_video' => 'Apartment Video',
+        // Auth / OTP fields
+        'code' => 'Verification Code',
+        'fcm_token' => 'Device Token',
+        'device_type' => 'Device Type',
+        'device_token' => 'Device Token',
+        'identity_number' => 'Identity Number',
+        'trans_id' => 'Transaction ID',
+        'status' => 'Status',
+        'reference' => 'Reference',
+        // Contact / message fields
+        'message' => 'Message',
+        'message_type' => 'Message Type',
+        'reply' => 'Reply',
+        'reason' => 'Reason',
+        'rating' => 'Rating',
+        'feedback' => 'Feedback',
+        // Notification fields
+        'title' => 'Title',
+        'title_en' => 'Title (English)',
+        'title_ar' => 'Title (Arabic)',
+        'body' => 'Notification Body',
+        'body_en' => 'Notification Body (English)',
+        'body_ar' => 'Notification Body (Arabic)',
+        'user_ids' => 'Users',
+        'user_ids.*' => 'User ID',
+        // Package / subscription fields
+        'package_id' => 'Package',
+        'image' => 'Image',
+        // Role / permission fields
+        'permissions' => 'Permissions',
+        'permissions.*' => 'Permission',
+        // Settings fields
+        'value_ar' => 'Value (Arabic)',
+        'value_en' => 'Value (English)',
+        'is_free_period_enabled' => 'Free Period Enabled',
+        'free_period_start_date' => 'Free Period Start Date',
+        'free_period_end_date' => 'Free Period End Date',
+        'free_period_reason_ar' => 'Free Period Reason (Arabic)',
+        'free_period_reason_en' => 'Free Period Reason (English)',
+        // Contact setting fields
+        'facebook_link' => 'Facebook Link',
+        'x_link' => 'X (Twitter) Link',
+        'instagram_link' => 'Instagram Link',
+        'snapchat_link' => 'Snapchat Link',
+        'tiktok_link' => 'TikTok Link',
+        'youtube_link' => 'YouTube Link',
+        'whatsapp_number' => 'WhatsApp Number',
+        'contact_numbers' => 'Contact Numbers',
+        'contact_numbers.*' => 'Contact Number',
+        // Blog fields
+        'description_ar' => 'Description (Arabic)',
+        'description_en' => 'Description (English)',
+        'content' => 'Content',
+        'content_ar' => 'Content (Arabic)',
+        'content_en' => 'Content (English)',
+        'main_image_ar' => 'Main Image (Arabic)',
+        'main_image_en' => 'Main Image (English)',
+        'meta_title' => 'Meta Title',
+        'meta_title_ar' => 'Meta Title (Arabic)',
+        'meta_title_en' => 'Meta Title (English)',
+        'meta_description' => 'Meta Description',
+        'meta_description_ar' => 'Meta Description (Arabic)',
+        'meta_description_en' => 'Meta Description (English)',
+        'image_alt' => 'Image Alt Text',
+        'image_alt_ar' => 'Image Alt Text (Arabic)',
+        'image_alt_en' => 'Image Alt Text (English)',
     ],
 
 ];

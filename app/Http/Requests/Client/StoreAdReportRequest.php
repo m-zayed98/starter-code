@@ -17,13 +17,4 @@ class StoreAdReportRequest extends FormRequest
             'reason' => ['required', 'string', 'min:10', 'max:500'],
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'reason.required' => __('هذا الحقل إلزامي'),
-            'reason.min'      => __('سبب الإبلاغ يجب أن يكون 10 أحرف على الأقل'),
-            'reason.max'      => __('الحد الأقصى لسبب الإبلاغ 500 حرف'),
-        ];
-    }
 }

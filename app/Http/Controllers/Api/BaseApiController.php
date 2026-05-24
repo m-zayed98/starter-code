@@ -8,7 +8,6 @@ use App\Repositories\DTOs\QueryOptions;
 use App\Services\BaseModelService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
 /**
@@ -90,7 +89,7 @@ abstract class BaseApiController extends Controller
 
     public static function middleware(): array
     {
-        $instance = new static();
+        $instance = new static;
 
         if (! $instance->usePermissions) {
             return [];
@@ -99,10 +98,10 @@ abstract class BaseApiController extends Controller
         $name = $instance->modelName();
 
         return [
-            new Middleware("permission:{$name}:read",         only: ['index', 'show']),
-            new Middleware("permission:{$name}:create",        only: ['store']),
-            new Middleware("permission:{$name}:update",        only: ['update', 'toggleStatus']),
-            new Middleware("permission:{$name}:delete",       only: ['destroy']),
+            new Middleware("permission:{$name}:read", only: ['index', 'show']),
+            new Middleware("permission:{$name}:create", only: ['store']),
+            new Middleware("permission:{$name}:update", only: ['update', 'toggleStatus']),
+            new Middleware("permission:{$name}:delete", only: ['destroy']),
         ];
     }
 
@@ -112,8 +111,8 @@ abstract class BaseApiController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $options    = $this->resolveQueryOptions('index');
-        $result     = $this->service->get($options);
+        $options = $this->resolveQueryOptions('index');
+        $result = $this->service->get($options);
         $collection = $this->resource::collection($result);
 
         $response = ApiResponse::respondWithCollection($collection);
@@ -134,24 +133,24 @@ abstract class BaseApiController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $data  = $this->resolveFormRequest($this->storeRequest)->validated();
+        $data = $this->resolveFormRequest($this->storeRequest)->validated();
         $model = $this->service->create($data);
 
         return ApiResponse::respondWithModel(
             new $this->resource($model),
-            message: $this->modelName() . ' created successfully.',
+            message: __('Created successfully'),
             httpStatus: 201,
         )->send();
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $data  = $this->resolveFormRequest($this->updateRequest)->validated();
+        $data = $this->resolveFormRequest($this->updateRequest)->validated();
         $model = $this->service->update($id, $data);
 
         return ApiResponse::respondWithModel(
             new $this->resource($model),
-            message: $this->modelName() . ' updated successfully.',
+            message: __('Updated successfully'),
         )->send();
     }
 
@@ -160,7 +159,7 @@ abstract class BaseApiController extends Controller
         $this->service->delete($id);
 
         return ApiResponse::respondWithSuccess(
-            message: $this->modelName() . ' deleted successfully.',
+            message: __('Deleted successfully'),
         )->send();
     }
 
@@ -170,13 +169,13 @@ abstract class BaseApiController extends Controller
     public function toggleStatus(Request $request, int $id): JsonResponse
     {
         $column = $this->statusColumn();
-        $model  = $this->service->showOrFail($id);
+        $model = $this->service->showOrFail($id);
         $this->service->update($id, [$column => ! $model->{$column}]);
         $updated = $this->service->showOrFail($id, $this->resolveQueryOptions('show'));
 
         return ApiResponse::respondWithModel(
             new $this->resource($updated),
-            message: $this->modelName() . ' status updated successfully.',
+            message: __('Updated successfully'),
         )->send();
     }
 

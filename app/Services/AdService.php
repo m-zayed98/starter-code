@@ -12,6 +12,7 @@ use App\Repositories\Contracts\SubscriptionRepositoryContract;
 use App\Repositories\Contracts\UserRepositoryContract;
 use App\Settings\GeneralSetting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -39,9 +40,7 @@ class AdService
      *  6. Increment user_ads_count on the active subscription (if any).
      *  7. Return the newly created Ad.
      *
-     * @param int   $userId
-     * @param array $data  Validated payload from InitiateAdRequest
-     * @return Ad
+     * @param  array  $data  Validated payload from InitiateAdRequest
      *
      * @throws AdException               When subscription rules are violated.
      * @throws \DomainException          When an ad with the same ad_license_number already exists.
@@ -83,9 +82,9 @@ class AdService
                 'user_id'            => $userId,
                 'package_id'         => $subscription?->ad_package_id,
                 'fal_license_number' => $data['fal_license_number'],
-                'ad_license_number'  => $adLicenseNumber,
-                'nhc_data'           => $nhcDto->toArray(),
-                'status'             => AdStatus::DRAFT->value,
+                'ad_license_number' => $adLicenseNumber,
+                'nhc_data' => $nhcDto->toArray(),
+                'status' => AdStatus::DRAFT->value,
             ]);
 
             // Increment the subscription's used-ads counter (when a subscription is active)
@@ -104,28 +103,25 @@ class AdService
      * Handles media uploads (cover image, apartment images, video).
      * Publishes the ad when all required fields are present.
      *
-     * @param int   $adId
-     * @param int   $userId
-     * @param array $data  Validated payload from UpdateAdRequest
-     * @return Ad
+     * @param  array  $data  Validated payload from UpdateAdRequest
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  When ad not found or not owned by user.
+     * @throws ModelNotFoundException When ad not found or not owned by user.
      */
     public function updateAd(int $adId, int $userId, array $data): Ad
     {
         $ad = $this->adRepository->findForUser($adId, $userId);
 
         if ($ad === null) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+            throw new ModelNotFoundException(
                 "Ad #{$adId} not found for user #{$userId}."
             );
         }
 
         return DB::transaction(function () use ($ad, $data) {
             // Extract file fields before persisting scalar data
-            $coverImage       = Arr::pull($data, 'cover_image');
-            $apartmentImages  = Arr::pull($data, 'apartment_images', []);
-            $apartmentVideo   = Arr::pull($data, 'apartment_video');
+            $coverImage = Arr::pull($data, 'cover_image');
+            $apartmentImages = Arr::pull($data, 'apartment_images', []);
+            $apartmentVideo = Arr::pull($data, 'apartment_video');
 
             // UpdateAdRequest validates ALL required fields — if we reach here
             // the ad is complete, so promote it to published immediately.
@@ -143,7 +139,7 @@ class AdService
                     ->uploadTo($updated);
             }
 
-            if (!empty($apartmentImages)) {
+            if (! empty($apartmentImages)) {
                 foreach ($apartmentImages as $image) {
                     if ($image instanceof UploadedFile) {
                         MediaUpload::file($image)
@@ -175,14 +171,14 @@ class AdService
     /**
      * Return a single ad owned by the given user.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function showUserAd(int $adId, int $userId): Ad
     {
         $ad = $this->adRepository->findForUser($adId, $userId);
 
         if ($ad === null) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+            throw new ModelNotFoundException(
                 "Ad #{$adId} not found for user #{$userId}."
             );
         }
@@ -193,14 +189,14 @@ class AdService
     /**
      * Delete an ad owned by the given user.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function deleteAd(int $adId, int $userId): void
     {
         $ad = $this->adRepository->findForUser($adId, $userId);
 
         if ($ad === null) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+            throw new ModelNotFoundException(
                 "Ad #{$adId} not found for user #{$userId}."
             );
         }
@@ -216,22 +212,22 @@ class AdService
      *
      * Only ads that have been fully completed (not draft) can be toggled.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     * @throws \DomainException  When the ad is still a draft.
+     * @throws ModelNotFoundException
+     * @throws \DomainException When the ad is still a draft.
      */
     public function toggleStatus(int $adId, int $userId): Ad
     {
         $ad = $this->adRepository->findForUser($adId, $userId);
 
         if ($ad === null) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+            throw new ModelNotFoundException(
                 "Ad #{$adId} not found for user #{$userId}."
             );
         }
 
         if ($ad->status === AdStatus::DRAFT) {
             throw new \DomainException(
-                __('لا يمكن تغيير حالة إعلان لم يكتمل بعد.')
+                __('Cannot change the status of an incomplete ad.')
             );
         }
 
@@ -252,9 +248,9 @@ class AdService
     public function getUserAdStats(int $userId): array
     {
         return [
-            'published_ads_count'   => $this->adRepository->countPublishedForUser($userId),
+            'published_ads_count' => $this->adRepository->countPublishedForUser($userId),
             'unpublished_ads_count' => $this->adRepository->countUnpublishedForUser($userId),
-            'total_views'           => $this->adRepository->sumViewsForUser($userId),
+            'total_views' => $this->adRepository->sumViewsForUser($userId),
         ];
     }
 
@@ -309,9 +305,6 @@ class AdService
      *
      * Fields are only written if they are not already set, so subsequent
      * ad creations do not overwrite the existing profile.
-     *
-     * @param int   $userId
-     * @param array $data
      */
     private function syncUserFalProfile(int $userId, array $data): void
     {
@@ -319,35 +312,32 @@ class AdService
 
         $profileUpdate = [];
 
-        if (empty($user->fal_license_number) && !empty($data['fal_license_number'])) {
+        if (empty($user->fal_license_number) && ! empty($data['fal_license_number'])) {
             $profileUpdate['fal_license_number'] = $data['fal_license_number'];
         }
 
-        if (empty($user->nhc_mobile) && !empty($data['nhc_mobile'])) {
+        if (empty($user->nhc_mobile) && ! empty($data['nhc_mobile'])) {
             $profileUpdate['nhc_mobile'] = $data['nhc_mobile'];
         }
 
-        if (empty($user->advertiser_type) && !empty($data['advertiser_type'])) {
+        if (empty($user->advertiser_type) && ! empty($data['advertiser_type'])) {
             $profileUpdate['advertiser_type'] = $data['advertiser_type'];
         }
 
         if (
             empty($user->commercial_registration_number)
-            && !empty($data['commercial_registration_number'])
+            && ! empty($data['commercial_registration_number'])
         ) {
             $profileUpdate['commercial_registration_number'] = $data['commercial_registration_number'];
         }
 
-        if (!empty($profileUpdate)) {
+        if (! empty($profileUpdate)) {
             $this->userRepository->update($userId, $profileUpdate);
         }
     }
 
     /**
      * Upload the commercial registration document to the user's media collection.
-     *
-     * @param int          $userId
-     * @param UploadedFile $file
      */
     private function uploadCommercialRegistration(int $userId, UploadedFile $file): void
     {
@@ -370,11 +360,6 @@ class AdService
      *
      * All field-name mapping is handled inside NhcAdDataDTO::fromNhcResponse(),
      * so if NHC renames a field only the DTO needs updating.
-     *
-     * @param string $adLicenseNumber
-     * @param string $falLicenseNumber
-     * @param string $nhcMobile
-     * @return NhcAdDataDTO
      */
     private function callMockNhcApi(
         string $adLicenseNumber,
@@ -386,43 +371,43 @@ class AdService
         // When integrating the real API, replace this method body with an
         // HTTP call and pass the raw response directly to fromNhcResponse().
         $mockResponse = [
-            'isValid'                            => true,
-            'advertiserId'                       => '1234567890',
-            'adLicenseNumber'                    => $adLicenseNumber,
-            'advertiserName'                     => 'محمد عبدالله',
-            'phoneNumber'                        => $nhcMobile,
+            'isValid' => true,
+            'advertiserId' => '1234567890',
+            'adLicenseNumber' => $adLicenseNumber,
+            'advertiserName' => 'محمد عبدالله',
+            'phoneNumber' => $nhcMobile,
             'brokerageAndMarketingLicenseNumber' => $falLicenseNumber,
-            'deedNumber'                         => 'DEED-' . random_int(100000, 999999),
-            'propertyPrice'                      => '850000',
-            'propertyType'                       => 'شقة',
-            'propertyAge'                        => 'أقل من عام',
-            'advertisementType'                  => 'بيع',
-            'propertyFace'                       => 'شمالية',
-            'propertyUsages'                     => ['سكني'],
-            'propertyArea'                       => '180.5',
-            'streetWidth'                        => '15',
-            'numberOfRooms'                      => '4',
-            'planNumber'                         => 'PLN-' . strtoupper(substr($adLicenseNumber, 0, 6)),
-            'landNumber'                         => (string) random_int(1000, 9999),
-            'guaranteesAndTheirDuration'         => 'ضمان المقاول لمدة سنة',
-            'obligationsOnTheProperty'           => 'لا يوجد',
-            'ownershipTransferFeeType'           => 'Owner Contract Approver (مسئول اعتماد عقد المالك)',
-            'LocationDescriptionOnMOJDeed'       => 'شقة سكنية في حي النرجس، الرياض',
-            'propertyUtilities'                  => ['كهرباء', 'مياه', 'صرف صحي'],
-            'responsibleEmployeeName'            => 'محمد عبدالله',
-            'responsibleEmployeePhoneNumber'     => '0512345678',
-            'location'                           => [
+            'deedNumber' => 'DEED-' . random_int(100000, 999999),
+            'propertyPrice' => '850000',
+            'propertyType' => 'شقة',
+            'propertyAge' => 'أقل من عام',
+            'advertisementType' => 'بيع',
+            'propertyFace' => 'شمالية',
+            'propertyUsages' => ['سكني'],
+            'propertyArea' => '180.5',
+            'streetWidth' => '15',
+            'numberOfRooms' => '4',
+            'planNumber' => 'PLN-' . strtoupper(substr($adLicenseNumber, 0, 6)),
+            'landNumber' => (string) random_int(1000, 9999),
+            'guaranteesAndTheirDuration' => 'ضمان المقاول لمدة سنة',
+            'obligationsOnTheProperty' => 'لا يوجد',
+            'ownershipTransferFeeType' => 'Owner Contract Approver (مسئول اعتماد عقد المالك)',
+            'LocationDescriptionOnMOJDeed' => 'شقة سكنية في حي النرجس، الرياض',
+            'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي'],
+            'responsibleEmployeeName' => 'محمد عبدالله',
+            'responsibleEmployeePhoneNumber' => '0512345678',
+            'location' => [
                 [
-                    'region'    => 'الرياض',
-                    'city'      => 'الرياض',
-                    'district'  => 'النرجس',
-                    'latitude'  => '24.7136',
+                    'region' => 'الرياض',
+                    'city' => 'الرياض',
+                    'district' => 'النرجس',
+                    'latitude' => '24.7136',
                     'longitude' => '46.6753',
                 ],
             ],
-            'adLicenseURL'  => 'https://nhc.gov.sa/license/' . $adLicenseNumber,
-            'creationDate'  => now()->toDateString(),
-            'endDate'       => now()->addYear()->toDateString(),
+            'adLicenseURL' => 'https://nhc.gov.sa/license/' . $adLicenseNumber,
+            'creationDate' => now()->toDateString(),
+            'endDate' => now()->addYear()->toDateString(),
         ];
 
         return NhcAdDataDTO::fromNhcResponse($mockResponse);

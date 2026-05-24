@@ -33,9 +33,6 @@ class AdReportController extends BaseApiController
 
     /**
      * GET /admin/ad-reports
-     *
-     * Paginated list of all ad reports.
-     * Supports search by user name/phone, ad_name, and status filter.
      */
     public function index(Request $request): JsonResponse
     {
@@ -51,8 +48,6 @@ class AdReportController extends BaseApiController
 
     /**
      * GET /admin/ad-reports/{id}
-     *
-     * Full detail of a single report.
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -63,7 +58,7 @@ class AdReportController extends BaseApiController
             $report = $service->showReport($id);
         } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('البلاغ غير موجود.'),
+                __('Report not found.'),
                 httpStatus: 404,
             )->send();
         }
@@ -73,8 +68,6 @@ class AdReportController extends BaseApiController
 
     /**
      * POST /admin/ad-reports/{id}/reply
-     *
-     * Reply to a report. Sends email to the user.
      */
     public function reply(ReplyAdReportRequest $request, int $id): JsonResponse
     {
@@ -85,14 +78,14 @@ class AdReportController extends BaseApiController
             $report = $service->reply($id, $request->validated('reply'));
         } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('البلاغ غير موجود.'),
+                __('Report not found.'),
                 httpStatus: 404,
             )->send();
         }
 
         return ApiResponse::respondWithModel(
             new AdReportDetailResource($report),
-            message: __('تم إرسال الرد بنجاح.'),
+            message: __('Reply sent successfully.'),
         )->send();
     }
 }

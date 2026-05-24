@@ -31,9 +31,6 @@ class AdReviewController extends BaseApiController
 
     /**
      * GET /admin/ad-reviews
-     *
-     * Paginated list of all ad reviews.
-     * Supports search by user name/phone and status filter (published|hidden).
      */
     public function index(Request $request): JsonResponse
     {
@@ -49,8 +46,6 @@ class AdReviewController extends BaseApiController
 
     /**
      * PUT /admin/ad-reviews/{id}/toggle-visibility
-     *
-     * Toggle review between published (visible) and hidden.
      */
     public function toggleVisibility(Request $request, int $id): JsonResponse
     {
@@ -61,14 +56,14 @@ class AdReviewController extends BaseApiController
             $review = $service->toggleVisibility($id);
         } catch (ModelNotFoundException) {
             return ApiResponse::respondWithError(
-                __('التعليق غير موجود.'),
+                __('Comment not found.'),
                 httpStatus: 404,
             )->send();
         }
 
         return ApiResponse::respondWithModel(
             new AdReviewListResource($review),
-            message: __('تم تحديث حالة التعليق بنجاح.'),
+            message: __('Comment status updated successfully.'),
         )->send();
     }
 }

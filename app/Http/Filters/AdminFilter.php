@@ -17,20 +17,22 @@ class AdminFilter extends BaseFilters
     /**
      * Filter by search term.
      *
-     * @param string $value
+     * @param  string  $value
      * @return void
      */
     protected function search($value)
     {
         $this->builder->where(function ($query) use ($value) {
-            $query->where('name', 'like', "%{$value}%");
+            $query->where('name', 'like', "%{$value}%")
+                ->orWhere('phone', 'like', "%{$value}%")
+                ->orWhere('email', 'like', "%{$value}%");
         });
     }
 
     /**
      * Filter by status.
      *
-     * @param string $value
+     * @param  string  $value
      * @return void
      */
     protected function status($value)

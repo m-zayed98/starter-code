@@ -7,10 +7,11 @@ use App\Models\Ad;
 use App\Models\AdReport;
 use App\Models\AdReview;
 use App\Repositories\Contracts\AdActionRepositoryContract;
-use App\Repositories\Contracts\AdRepositoryContract;
 use App\Repositories\Contracts\AdReportRepositoryContract;
+use App\Repositories\Contracts\AdRepositoryContract;
 use App\Repositories\Contracts\AdReviewRepositoryContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Handles all public-facing ad operations:
@@ -22,7 +23,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class PublicAdService
 {
     public function __construct(
-        private readonly AdRepositoryContract       $adRepository,
+        private readonly AdRepositoryContract $adRepository,
         private readonly AdReviewRepositoryContract $reviewRepository,
         private readonly AdReportRepositoryContract $reportRepository,
         private readonly AdActionRepositoryContract $adActionRepository,
@@ -53,17 +54,16 @@ class PublicAdService
      * Records a view action for authenticated users (deduplicated per user per ad).
      * When a userId is provided, appends has_review and has_report flags to the model.
      *
-     * @param int      $adId
-     * @param int|null $userId  Pass the authenticated user's ID to record a view, or null for guests.
+     * @param  int|null  $userId  Pass the authenticated user's ID to record a view, or null for guests.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function showPublishedAd(int $adId, ?int $userId = null): Ad
     {
         $ad = $this->adRepository->findPublishedWithDetails($adId, $userId);
 
         if ($ad === null) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+            throw new ModelNotFoundException(
                 "Published ad #{$adId} not found."
             );
         }
@@ -82,8 +82,8 @@ class PublicAdService
      * Submit a review for an ad.
      * One review per user per ad — throws DomainException if already reviewed.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  Ad not found.
-     * @throws \DomainException                                       Already reviewed.
+     * @throws ModelNotFoundException Ad not found.
+     * @throws \DomainException Already reviewed.
      */
     public function submitReview(int $adId, int $userId, int $rating, ?string $feedback): AdReview
     {
@@ -92,15 +92,15 @@ class PublicAdService
 
         if ($this->reviewRepository->hasUserReviewedAd($adId, $userId)) {
             throw new \DomainException(
-                __('لقد قمت بتقييم هذا الإعلان مسبقاً.')
+                __('You have already reviewed this ad.')
             );
         }
 
         /** @var AdReview $review */
         $review = $this->reviewRepository->create([
-            'ad_id'    => $adId,
-            'user_id'  => $userId,
-            'rating'   => $rating,
+            'ad_id' => $adId,
+            'user_id' => $userId,
+            'rating' => $rating,
             'feedback' => $feedback,
         ]);
 
@@ -113,8 +113,8 @@ class PublicAdService
      * Submit a report for an ad.
      * One report per user per ad — throws DomainException if already reported.
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  Ad not found.
-     * @throws \DomainException                                       Already reported.
+     * @throws ModelNotFoundException Ad not found.
+     * @throws \DomainException Already reported.
      */
     public function submitReport(int $adId, int $userId, string $reason): AdReport
     {
@@ -123,15 +123,15 @@ class PublicAdService
 
         if ($this->reportRepository->hasUserReportedAd($adId, $userId)) {
             throw new \DomainException(
-                __('لقد قمت بالإبلاغ عن هذا الإعلان مسبقاً.')
+                __('You have already reported this ad.')
             );
         }
 
         /** @var AdReport $report */
         $report = $this->reportRepository->create([
-            'ad_id'   => $adId,
+            'ad_id' => $adId,
             'user_id' => $userId,
-            'reason'  => $reason,
+            'reason' => $reason,
         ]);
 
         return $report;
