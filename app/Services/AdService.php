@@ -356,7 +356,9 @@ class AdService
      * Mock implementation of the NHC (National Housing Company) API call.
      *
      * In production this would make an authenticated HTTP request to the real
-     * NHC service. Here it returns realistic dummy data to simulate the response.
+     * NHC service. Here it picks one of 10 realistic templates (keyed by
+     * ad_license_number) so each license returns different property data —
+     * same license always gets the same shape for repeatable testing.
      *
      * All field-name mapping is handled inside NhcAdDataDTO::fromNhcResponse(),
      * so if NHC renames a field only the DTO needs updating.
@@ -370,46 +372,315 @@ class AdService
         // (GET /v2/brokerage/AdvertisementValidator).
         // When integrating the real API, replace this method body with an
         // HTTP call and pass the raw response directly to fromNhcResponse().
-        $mockResponse = [
+        $templates = $this->mockNhcTemplates();
+        $index = abs(crc32($adLicenseNumber)) % count($templates);
+        $template = $templates[$index];
+
+        $mockResponse = array_merge($template, [
             'isValid' => true,
-            'advertiserId' => '1234567890',
             'adLicenseNumber' => $adLicenseNumber,
-            'advertiserName' => 'محمد عبدالله',
             'phoneNumber' => $nhcMobile,
             'brokerageAndMarketingLicenseNumber' => $falLicenseNumber,
-            'deedNumber' => 'DEED-' . random_int(100000, 999999),
-            'propertyPrice' => '850000',
-            'propertyType' => 'شقة',
-            'propertyAge' => 'أقل من عام',
-            'advertisementType' => 'بيع',
-            'propertyFace' => 'شمالية',
-            'propertyUsages' => ['سكني'],
-            'propertyArea' => '180.5',
-            'streetWidth' => '15',
-            'numberOfRooms' => '4',
-            'planNumber' => 'PLN-' . strtoupper(substr($adLicenseNumber, 0, 6)),
-            'landNumber' => (string) random_int(1000, 9999),
-            'guaranteesAndTheirDuration' => 'ضمان المقاول لمدة سنة',
-            'obligationsOnTheProperty' => 'لا يوجد',
-            'ownershipTransferFeeType' => 'Owner Contract Approver (مسئول اعتماد عقد المالك)',
-            'LocationDescriptionOnMOJDeed' => 'شقة سكنية في حي النرجس، الرياض',
-            'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي'],
-            'responsibleEmployeeName' => 'محمد عبدالله',
-            'responsibleEmployeePhoneNumber' => '0512345678',
-            'location' => [
-                [
+            'deedNumber' => 'DEED-' . (100000 + ($index * 11111) + (abs(crc32($adLicenseNumber)) % 9000)),
+            'planNumber' => 'PLN-' . strtoupper(substr($adLicenseNumber, 0, 6) ?: 'MOCK' . $index),
+            'landNumber' => (string) (1000 + ($index * 137) + (abs(crc32($adLicenseNumber)) % 800)),
+            'adLicenseURL' => 'https://nhc.gov.sa/license/' . $adLicenseNumber,
+            'creationDate' => now()->subDays($index * 7)->toDateString(),
+            'endDate' => now()->subDays($index * 7)->addYear()->toDateString(),
+        ]);
+
+        return NhcAdDataDTO::fromNhcResponse($mockResponse);
+    }
+
+    /**
+     * Ten varied NHC-shaped property samples for local/testing use.
+     * Selection is deterministic via ad_license_number hash.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function mockNhcTemplates(): array
+    {
+        return [
+            // 1 — شقة للبيع، الرياض / النرجس
+            [
+                'advertiserId' => '1000000001',
+                'advertiserName' => 'محمد عبدالله العتيبي',
+                'propertyPrice' => '850000',
+                'propertyType' => 'شقة',
+                'propertyAge' => 'أقل من عام',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'شمالية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '180.5',
+                'streetWidth' => '15',
+                'numberOfRooms' => '4',
+                'guaranteesAndTheirDuration' => 'ضمان المقاول لمدة سنة',
+                'obligationsOnTheProperty' => 'لا يوجد',
+                'ownershipTransferFeeType' => 'Owner Contract Approver (مسئول اعتماد عقد المالك)',
+                'LocationDescriptionOnMOJDeed' => 'شقة سكنية في حي النرجس، الرياض',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي'],
+                'responsibleEmployeeName' => 'محمد عبدالله العتيبي',
+                'responsibleEmployeePhoneNumber' => '0512345678',
+                'location' => [[
                     'region' => 'الرياض',
                     'city' => 'الرياض',
                     'district' => 'النرجس',
-                    'latitude' => '24.7136',
-                    'longitude' => '46.6753',
-                ],
+                    'latitude' => '24.8301',
+                    'longitude' => '46.6552',
+                ]],
             ],
-            'adLicenseURL' => 'https://nhc.gov.sa/license/' . $adLicenseNumber,
-            'creationDate' => now()->toDateString(),
-            'endDate' => now()->addYear()->toDateString(),
+            // 2 — فيلا للبيع، جدة / أبحر
+            [
+                'advertiserId' => '1000000002',
+                'advertiserName' => 'سارة فهد الغامدي',
+                'propertyPrice' => '2450000',
+                'propertyType' => 'فيلا',
+                'propertyAge' => 'من 1 إلى 5 سنوات',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'غربية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '420',
+                'streetWidth' => '20',
+                'numberOfRooms' => '6',
+                'guaranteesAndTheirDuration' => 'ضمان الهيكل لمدة 10 سنوات',
+                'obligationsOnTheProperty' => 'رسوم صيانة سنوية على المجمع',
+                'ownershipTransferFeeType' => 'Buyer (المشتري)',
+                'LocationDescriptionOnMOJDeed' => 'فيلا مستقلة في حي أبحر الشمالية، جدة',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'غاز'],
+                'responsibleEmployeeName' => 'خالد أحمد الزهراني',
+                'responsibleEmployeePhoneNumber' => '0559876543',
+                'location' => [[
+                    'region' => 'مكة المكرمة',
+                    'city' => 'جدة',
+                    'district' => 'أبحر الشمالية',
+                    'latitude' => '21.7519',
+                    'longitude' => '39.1386',
+                ]],
+            ],
+            // 3 — شقة للإيجار، الدمام / الشاطئ
+            [
+                'advertiserId' => '1000000003',
+                'advertiserName' => 'عبدالرحمن سعد القحطاني',
+                'propertyPrice' => '35000',
+                'propertyType' => 'شقة',
+                'propertyAge' => 'من 5 إلى 10 سنوات',
+                'advertisementType' => 'إيجار',
+                'propertyFace' => 'شرقية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '145',
+                'streetWidth' => '12',
+                'numberOfRooms' => '3',
+                'guaranteesAndTheirDuration' => 'لا يوجد',
+                'obligationsOnTheProperty' => 'دفع الإيجار مقدماً كل ستة أشهر',
+                'ownershipTransferFeeType' => 'N/A',
+                'LocationDescriptionOnMOJDeed' => 'شقة مفروشة جزئياً في حي الشاطئ، الدمام',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'إنترنت'],
+                'responsibleEmployeeName' => 'عبدالرحمن سعد القحطاني',
+                'responsibleEmployeePhoneNumber' => '0533445566',
+                'location' => [[
+                    'region' => 'المنطقة الشرقية',
+                    'city' => 'الدمام',
+                    'district' => 'الشاطئ',
+                    'latitude' => '26.4282',
+                    'longitude' => '50.1131',
+                ]],
+            ],
+            // 4 — أرض للبيع، الرياض / الملقا
+            [
+                'advertiserId' => '1000000004',
+                'advertiserName' => 'نورة إبراهيم الشمري',
+                'propertyPrice' => '3200',
+                'propertyType' => 'أرض',
+                'propertyAge' => 'جديد',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'جنوبية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '625',
+                'streetWidth' => '18',
+                'numberOfRooms' => '0',
+                'guaranteesAndTheirDuration' => 'لا يوجد',
+                'obligationsOnTheProperty' => 'خاضعة لأنظمة البلدية',
+                'ownershipTransferFeeType' => 'Shared (مشترك)',
+                'LocationDescriptionOnMOJDeed' => 'أرض سكنية خام في حي الملقا، الرياض',
+                'propertyUtilities' => ['كهرباء', 'مياه'],
+                'responsibleEmployeeName' => 'فيصل ناصر الدوسري',
+                'responsibleEmployeePhoneNumber' => '0541122334',
+                'location' => [[
+                    'region' => 'الرياض',
+                    'city' => 'الرياض',
+                    'district' => 'الملقا',
+                    'latitude' => '24.7915',
+                    'longitude' => '46.6078',
+                ]],
+            ],
+            // 5 — محل تجاري للإيجار، الرياض / العليا
+            [
+                'advertiserId' => '1000000005',
+                'advertiserName' => 'مؤسسة النخبة العقارية',
+                'propertyPrice' => '120000',
+                'propertyType' => 'محل',
+                'propertyAge' => 'من 10 إلى 20 سنة',
+                'advertisementType' => 'إيجار',
+                'propertyFace' => 'شمالية شرقية',
+                'propertyUsages' => ['تجاري'],
+                'propertyArea' => '95',
+                'streetWidth' => '30',
+                'numberOfRooms' => '1',
+                'guaranteesAndTheirDuration' => 'لا يوجد',
+                'obligationsOnTheProperty' => 'تأمين إيجار يعادل شهرين',
+                'ownershipTransferFeeType' => 'N/A',
+                'LocationDescriptionOnMOJDeed' => 'محل تجاري على شارع رئيسي في حي العليا، الرياض',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'تكييف مركزي'],
+                'responsibleEmployeeName' => 'ماجد سليمان الحربي',
+                'responsibleEmployeePhoneNumber' => '0567788990',
+                'location' => [[
+                    'region' => 'الرياض',
+                    'city' => 'الرياض',
+                    'district' => 'العليا',
+                    'latitude' => '24.6932',
+                    'longitude' => '46.6851',
+                ]],
+            ],
+            // 6 — دور للإيجار، المدينة المنورة / العزيزية
+            [
+                'advertiserId' => '1000000006',
+                'advertiserName' => 'يوسف عمر الأنصاري',
+                'propertyPrice' => '28000',
+                'propertyType' => 'دور',
+                'propertyAge' => 'من 1 إلى 5 سنوات',
+                'advertisementType' => 'إيجار',
+                'propertyFace' => 'جنوبية غربية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '220',
+                'streetWidth' => '16',
+                'numberOfRooms' => '5',
+                'guaranteesAndTheirDuration' => 'صيانة مجانية لأول 3 أشهر',
+                'obligationsOnTheProperty' => 'لا يوجد',
+                'ownershipTransferFeeType' => 'N/A',
+                'LocationDescriptionOnMOJDeed' => 'دور علوي في فيلا مزدوجة، حي العزيزية، المدينة المنورة',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي'],
+                'responsibleEmployeeName' => 'يوسف عمر الأنصاري',
+                'responsibleEmployeePhoneNumber' => '0502233445',
+                'location' => [[
+                    'region' => 'المدينة المنورة',
+                    'city' => 'المدينة المنورة',
+                    'district' => 'العزيزية',
+                    'latitude' => '24.4672',
+                    'longitude' => '39.6111',
+                ]],
+            ],
+            // 7 — شقة للبيع، الخبر / الراكة
+            [
+                'advertiserId' => '1000000007',
+                'advertiserName' => 'هند ماجد العجمي',
+                'propertyPrice' => '720000',
+                'propertyType' => 'شقة',
+                'propertyAge' => 'من 5 إلى 10 سنوات',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'بحرية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '165',
+                'streetWidth' => '14',
+                'numberOfRooms' => '3',
+                'guaranteesAndTheirDuration' => 'لا يوجد',
+                'obligationsOnTheProperty' => 'رسوم اتحاد الملاك قائمة',
+                'ownershipTransferFeeType' => 'Buyer (المشتري)',
+                'LocationDescriptionOnMOJDeed' => 'شقة مطلة على البحر في حي الراكة، الخبر',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'مواقف سيارات'],
+                'responsibleEmployeeName' => 'طلال حسين العجمي',
+                'responsibleEmployeePhoneNumber' => '0590011223',
+                'location' => [[
+                    'region' => 'المنطقة الشرقية',
+                    'city' => 'الخبر',
+                    'district' => 'الراكة',
+                    'latitude' => '26.2667',
+                    'longitude' => '50.2083',
+                ]],
+            ],
+            // 8 — فيلا للإيجار، الرياض / الياسمين
+            [
+                'advertiserId' => '1000000008',
+                'advertiserName' => 'شركة دار الإسكان للعقارات',
+                'propertyPrice' => '95000',
+                'propertyType' => 'فيلا',
+                'propertyAge' => 'أقل من عام',
+                'advertisementType' => 'إيجار',
+                'propertyFace' => 'ثلاث واجهات',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '380',
+                'streetWidth' => '25',
+                'numberOfRooms' => '7',
+                'guaranteesAndTheirDuration' => 'صيانة شاملة لمدة سنة',
+                'obligationsOnTheProperty' => 'عقد إيجار موحد عبر إيجار',
+                'ownershipTransferFeeType' => 'N/A',
+                'LocationDescriptionOnMOJDeed' => 'فيلا حديثة مفروشة في حي الياسمين، الرياض',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'غاز', 'إنترنت', 'حراسة'],
+                'responsibleEmployeeName' => 'ريم عبدالله السبيعي',
+                'responsibleEmployeePhoneNumber' => '0576655443',
+                'location' => [[
+                    'region' => 'الرياض',
+                    'city' => 'الرياض',
+                    'district' => 'الياسمين',
+                    'latitude' => '24.8210',
+                    'longitude' => '46.6405',
+                ]],
+            ],
+            // 9 — استراحة للبيع، الطائف / الشفا
+            [
+                'advertiserId' => '1000000009',
+                'advertiserName' => 'بندر علي الثقفي',
+                'propertyPrice' => '1100000',
+                'propertyType' => 'استراحة',
+                'propertyAge' => 'من 1 إلى 5 سنوات',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'شمالية غربية',
+                'propertyUsages' => ['سكني', 'ترفيهي'],
+                'propertyArea' => '850',
+                'streetWidth' => '10',
+                'numberOfRooms' => '4',
+                'guaranteesAndTheirDuration' => 'ضمان المسبح والمرافق لمدة سنتين',
+                'obligationsOnTheProperty' => 'لا يوجد',
+                'ownershipTransferFeeType' => 'Owner Contract Approver (مسئول اعتماد عقد المالك)',
+                'LocationDescriptionOnMOJDeed' => 'استراحة مع مسبح وحديقة في منطقة الشفا، الطائف',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'بئر'],
+                'responsibleEmployeeName' => 'بندر علي الثقفي',
+                'responsibleEmployeePhoneNumber' => '0583344556',
+                'location' => [[
+                    'region' => 'مكة المكرمة',
+                    'city' => 'الطائف',
+                    'district' => 'الشفا',
+                    'latitude' => '21.1667',
+                    'longitude' => '40.3500',
+                ]],
+            ],
+            // 10 — شقة للبيع، مكة / العوالي
+            [
+                'advertiserId' => '1000000010',
+                'advertiserName' => 'أحمد حسن القرشي',
+                'propertyPrice' => '980000',
+                'propertyType' => 'شقة',
+                'propertyAge' => 'من 10 إلى 20 سنة',
+                'advertisementType' => 'بيع',
+                'propertyFace' => 'شرقية',
+                'propertyUsages' => ['سكني'],
+                'propertyArea' => '155',
+                'streetWidth' => '12',
+                'numberOfRooms' => '3',
+                'guaranteesAndTheirDuration' => 'لا يوجد',
+                'obligationsOnTheProperty' => 'رهن جزئي لدى البنك الأهلي',
+                'ownershipTransferFeeType' => 'Shared (مشترك)',
+                'LocationDescriptionOnMOJDeed' => 'شقة في برج سكني بحي العوالي، مكة المكرمة',
+                'propertyUtilities' => ['كهرباء', 'مياه', 'صرف صحي', 'مصعد'],
+                'responsibleEmployeeName' => 'أحمد حسن القرشي',
+                'responsibleEmployeePhoneNumber' => '0524455667',
+                'location' => [[
+                    'region' => 'مكة المكرمة',
+                    'city' => 'مكة المكرمة',
+                    'district' => 'العوالي',
+                    'latitude' => '21.3891',
+                    'longitude' => '39.8579',
+                ]],
+            ],
         ];
-
-        return NhcAdDataDTO::fromNhcResponse($mockResponse);
     }
 }
